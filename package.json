@@ -1,0 +1,16 @@
+{
+  "name": "vynk",
+  "version": "1.0.0",
+  "description": "Vynk — AI-Powered Financial Intelligence via Account Aggregator (ReBIT-Compliant)",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "express": "^4.21.0"
+  }
+}

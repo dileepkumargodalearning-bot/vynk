@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vynk — Financial Intelligence Dashboard</title>
+  <meta name="description" content="Vynk — AI-powered financial intelligence via Account Aggregator. Visualize your complete financial picture."/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <header>
+    <div class="header-inner">
+      <div class="logo">
+        <div class="logo-icon">V</div>
+        <div class="logo-text">
+          <h1>Vynk</h1>
+          <p>Financial Intelligence · Powered by Account Aggregator</p>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="user-selector">
+          <label for="userSelect">Test User:</label>
+          <select id="userSelect" class="custom-select">
+            <option value="">— Select User —</option>
+          </select>
+          <button class="btn btn--primary btn--sm" id="btnFetch" disabled>
+            <span>⚡</span> Fetch All FI Data
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Loader -->
+  <div class="loader" id="loader">
+    <div class="spinner"></div>
+    <div class="loader-text">Fetching financial data via Account Aggregator…</div>
+  </div>
+
+  <!-- Empty state -->
+  <div id="emptyState" class="empty-state">
+    <div class="empty-icon">📊</div>
+    <h2>Select a Test User</h2>
+    <p>Choose a user above and click <strong>"Fetch All FI Data"</strong> to simulate fetching their financial data via Account Aggregator (Finvu / Onemoney).</p>
+    <div class="user-cards" id="userCards"></div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboard" style="display:none">
+
+    <!-- Profile bar -->
+    <div class="profile-bar" id="profileBar"></div>
+
+    <!-- Net Worth Hero -->
+    <div class="hero-card" id="heroCard"></div>
+
+    <!-- Stats row -->
+    <div class="stats-row" id="statsRow"></div>
+
+    <!-- AA Pipeline Inspector -->
+    <div class="card mt-6 pipeline-card">
+      <div class="card-header">
+        <h3><span class="icon icon--crypto">🔐</span> AA Pipeline Inspector</h3>
+        <button class="btn btn--sm btn--outline" id="btnTogglePipeline">Show Details</button>
+      </div>
+      <div class="card-body">
+        <div class="pipeline-summary" id="pipelineSummary"></div>
+        <div class="pipeline-details" id="pipelineDetails" style="display:none">
+          <div class="pipeline-flow">
+            <div class="pf-step"><div class="pf-num">1</div><div class="pf-label">ReBIT XML</div><div class="pf-desc">Account data serialized to ReBIT FISchema XML</div></div>
+            <div class="pf-arrow">→</div>
+            <div class="pf-step"><div class="pf-num">2</div><div class="pf-label">ECDH Encrypt</div><div class="pf-desc">X25519 + HKDF-SHA256 + AES-256-GCM</div></div>
+            <div class="pf-arrow">→</div>
+            <div class="pf-step"><div class="pf-num">3</div><div class="pf-label">AA Response</div><div class="pf-desc">Encrypted FI data in ReBIT JSON format</div></div>
+            <div class="pf-arrow">→</div>
+            <div class="pf-step"><div class="pf-num">4</div><div class="pf-label">Decrypt + Parse</div><div class="pf-desc">FIU decrypts and parses XML to dashboard</div></div>
+          </div>
+          <h5 class="xml-preview-title mt-4">Decrypted ReBIT XML (First Account)</h5>
+          <pre class="xml-preview" id="xmlPreview"></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Two-column: Asset Allocation + Spending -->
+    <div class="grid-2 mt-6">
+      <div class="card">
+        <div class="card-header">
+          <h3><span class="icon icon--data">📊</span> Asset Allocation</h3>
+        </div>
+        <div class="card-body" id="allocationChart"></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h3><span class="icon icon--flow">💸</span> Spending Breakdown</h3>
+        </div>
+        <div class="card-body" id="spendingChart"></div>
+      </div>
+    </div>
+
+    <!-- Liabilities -->
+    <div class="card mt-6 liabilities-card">
+      <div class="card-header">
+        <h3><span class="icon icon--liability">🏦</span> Liabilities (Outstanding Loans)</h3>
+      </div>
+      <div class="card-body" id="liabilitiesSection"></div>
+    </div>
+
+    <!-- Year-wise Earnings & Expenses -->
+    <div class="card mt-6">
+      <div class="card-header">
+        <h3><span class="icon icon--yearly">📅</span> Year-wise Earnings &amp; Expenses</h3>
+      </div>
+      <div class="card-body">
+        <div class="yearly-summary" id="yearlySummary"></div>
+        <div class="data-table-wrap mt-4">
+          <table class="data-table" id="yearlyTable">
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Income</th>
+                <th>Expenses</th>
+                <th>Net Savings</th>
+                <th>Savings Rate</th>
+                <th>Trend</th>
+              </tr>
+            </thead>
+            <tbody id="yearlyTableBody"></tbody>
+            <tfoot id="yearlyTableFoot"></tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Account Cards -->
+    <h4 class="section-title mt-6">Individual Accounts</h4>
+    <div class="accounts-grid" id="accountsGrid"></div>
+
+    <!-- Recent Transactions -->
+    <div class="card mt-6">
+      <div class="card-header">
+        <h3><span class="icon icon--info">📋</span> Recent Transactions (All Deposit Accounts)</h3>
+      </div>
+      <div class="card-body">
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Account</th>
+                <th>Type</th>
+                <th>Mode</th>
+                <th>Amount</th>
+                <th>Category</th>
+                <th>Narration</th>
+              </tr>
+            </thead>
+            <tbody id="txnTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /#dashboard -->
+
+</div>
+<script src="app.js"></script>
+</body>
+</html>
