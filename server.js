@@ -884,12 +884,18 @@ const VERIFIED_RECEIPTS = [
 ];
 
 const ASSET_MODELS = [
-  { category: 'Real Estate', type: 'RE', keywords: ['PROPERTY', 'REGISTRATION', 'STAMP-DUTY', 'HOUSING', 'PLOT', 'LAND', 'FLAT'], minAmount: 500000, model: (val, yrs) => val * Math.pow(1 + 0.10, yrs) },
-  { category: 'Vehicle', type: 'VH', keywords: ['CAR', 'AUTOMOBILE', 'SHOWROOM', 'MARUTI', 'HYUNDAI', 'TOYOTA', 'TATA-MOTORS', 'HONDA', 'BAJAJ'], minAmount: 100000, model: (val, yrs) => val * Math.pow(1 - 0.15, yrs) },
-  { category: 'Luxury Watch', type: 'LX', keywords: ['ROLEX', 'OMEGA', 'TITAN-PREMIUM', 'ETHOS', 'WATCH'], minAmount: 50000, model: (val, yrs) => val * Math.pow(1 + 0.08, yrs) },
-  { category: 'Jewellery/Gold', type: 'JW', keywords: ['TANISHQ', 'KALYAN', 'MALABAR-GOLD', 'JEWEL', 'GOLD', 'PC-JEWELLER'], minAmount: 25000, model: (val, yrs) => val * Math.pow(1 + 0.10, yrs) },
-  { category: 'Electronics', type: 'EL', keywords: ['APPLE', 'SAMSUNG', 'CROMA', 'RELIANCE-DIGITAL', 'VIJAY-SALES'], minAmount: 20000, model: (val, yrs) => val * Math.pow(1 - 0.30, yrs) },
-  { category: 'Art/Collectibles', type: 'AR', keywords: ['AUCTION', 'SOTHEBY', 'CHRISTIE', 'ART-GALLERY'], minAmount: 50000, model: (val, yrs) => val * Math.pow(1 + 0.07, yrs) }
+  { category: 'Real Estate', type: 'RE', keywords: ['PROPERTY', 'REGISTRATION', 'STAMP-DUTY', 'HOUSING', 'PLOT', 'LAND', 'FLAT'], minAmount: 500000, model: (val, yrs) => val * Math.pow(1 + 0.10, yrs),
+    tokenRules: { standard: 'ERC-3643', totalSupply: 10000, minInvestment: 5000, lockInMonths: 12, transferable: true, kycRequired: true, jurisdiction: 'SEBI/RERA', fractionalLabel: 'sq.ft equivalent' } },
+  { category: 'Vehicle', type: 'VH', keywords: ['CAR', 'AUTOMOBILE', 'SHOWROOM', 'MARUTI', 'HYUNDAI', 'TOYOTA', 'TATA-MOTORS', 'HONDA', 'BAJAJ'], minAmount: 100000, model: (val, yrs) => val * Math.pow(1 - 0.15, yrs),
+    tokenRules: { standard: 'ERC-721', totalSupply: 1, minInvestment: null, lockInMonths: 0, transferable: true, kycRequired: true, jurisdiction: 'RTO/MoRTH', fractionalLabel: 'non-divisible (NFT)' } },
+  { category: 'Luxury Watch', type: 'LX', keywords: ['ROLEX', 'OMEGA', 'TITAN-PREMIUM', 'ETHOS', 'WATCH'], minAmount: 50000, model: (val, yrs) => val * Math.pow(1 + 0.08, yrs),
+    tokenRules: { standard: 'ERC-1155', totalSupply: 100, minInvestment: 10000, lockInMonths: 6, transferable: true, kycRequired: true, jurisdiction: 'BIS/Hallmark', fractionalLabel: 'fractional share' } },
+  { category: 'Jewellery/Gold', type: 'JW', keywords: ['TANISHQ', 'KALYAN', 'MALABAR-GOLD', 'JEWEL', 'GOLD', 'PC-JEWELLER'], minAmount: 25000, model: (val, yrs) => val * Math.pow(1 + 0.10, yrs),
+    tokenRules: { standard: 'ERC-20', totalSupply: 1000, minInvestment: 1000, lockInMonths: 0, transferable: true, kycRequired: false, jurisdiction: 'BIS/Hallmark', fractionalLabel: 'grams equivalent' } },
+  { category: 'Electronics', type: 'EL', keywords: ['APPLE', 'SAMSUNG', 'CROMA', 'RELIANCE-DIGITAL', 'VIJAY-SALES'], minAmount: 20000, model: (val, yrs) => val * Math.pow(1 - 0.30, yrs),
+    tokenRules: { standard: 'ERC-721', totalSupply: 1, minInvestment: null, lockInMonths: 0, transferable: true, kycRequired: false, jurisdiction: 'Consumer', fractionalLabel: 'non-divisible (NFT)' } },
+  { category: 'Art/Collectibles', type: 'AR', keywords: ['AUCTION', 'SOTHEBY', 'CHRISTIE', 'ART-GALLERY'], minAmount: 50000, model: (val, yrs) => val * Math.pow(1 + 0.07, yrs),
+    tokenRules: { standard: 'ERC-3643', totalSupply: 500, minInvestment: 5000, lockInMonths: 24, transferable: true, kycRequired: true, jurisdiction: 'SEBI/RBI', fractionalLabel: 'fractional ownership' } }
 ];
 
 function categorizeTransaction(narration) {
@@ -960,32 +966,33 @@ function buildDashboard(user) {
           allTransactions.push({ ...txn, accountLabel: acc.label });
           if (txn.type === 'CREDIT') totalIncome += txn.amount;
           else if (txn.type === 'DEBIT') {
-            totalExpenses += txn.amount;
-            const cat = categorizeTransaction(txn.narration);
-            spendingMap[cat] = (spendingMap[cat] || 0) + txn.amount;
+            // Check if this debit is an asset purchase (not regular spending)
+            let isAssetPurchase = false;
+            const narrationUpper = (txn.narration || '').toUpperCase();
 
-            // Asset detection
             for (const model of ASSET_MODELS) {
-              const narrationUpper = (txn.narration || '').toUpperCase();
               if (txn.amount >= model.minAmount && model.keywords.some(kw => narrationUpper.includes(kw))) {
+                isAssetPurchase = true;
                 const txnDate = new Date(txn.date);
-                const today = new Date('2024-07-01'); // Using fixed date for consistent CAGR
-                let years = (today - txnDate) / (1000 * 60 * 60 * 24 * 365);
+                const today = new Date('2026-07-01');
+                let years = (today - txnDate) / (1000 * 60 * 60 * 24 * 365.25);
                 if (years < 0) years = 0;
-                
+
                 const marketValue = model.model(txn.amount, years);
                 let cagr = 0;
-                if (years > 0) {
-                  cagr = ((marketValue / txn.amount) ** (1 / years)) - 1;
+                if (years > 0.01) {
+                  cagr = (Math.pow(marketValue / txn.amount, 1 / years) - 1) * 100;
                 }
 
-                // Check if user uploaded receipt
-                const isVerified = VERIFIED_RECEIPTS.some(r => 
-                   r.userId === user.id && 
+                const isVerified = VERIFIED_RECEIPTS.some(r =>
+                   r.userId === user.id &&
                    Math.abs(r.amount - txn.amount) <= (txn.amount * 0.05) &&
                    Math.abs(new Date(r.date) - txnDate) <= 3 * 24 * 60 * 60 * 1000 &&
                    narrationUpper.includes((r.merchant || '').toUpperCase())
                 );
+
+                const tr = model.tokenRules;
+                const tokenPerValue = tr.totalSupply > 1 ? Math.round(marketValue / tr.totalSupply) : marketValue;
 
                 assetsDetected.push({
                   id: `ast-${txn.date}-${txn.amount}`,
@@ -993,19 +1000,52 @@ function buildDashboard(user) {
                   type: model.type,
                   purchasePrice: txn.amount,
                   purchaseDate: txn.date,
-                  marketValue: marketValue,
-                  cagr: cagr * 100,
+                  marketValue,
+                  cagr,
+                  yearsHeld: Math.round(years * 10) / 10,
                   status: isVerified ? 'VERIFIED' : 'DETECTED',
                   narration: txn.narration,
-                  tokenId: isVerified ? `VNK-${model.type}-${String(tokenSerial++).padStart(3, '0')}` : null
+                  tokenId: isVerified ? `VNK-${model.type}-${String(tokenSerial++).padStart(3, '0')}` : null,
+                  tokenization: {
+                    standard: tr.standard,
+                    totalSupply: tr.totalSupply,
+                    tokenValue: tokenPerValue,
+                    minInvestment: tr.minInvestment,
+                    lockInMonths: tr.lockInMonths,
+                    transferable: tr.transferable,
+                    kycRequired: tr.kycRequired,
+                    jurisdiction: tr.jurisdiction,
+                    fractionalLabel: tr.fractionalLabel,
+                    metadataHash: require('node:crypto').createHash('sha256').update(`${txn.narration}-${txn.date}-${txn.amount}`).digest('hex').substring(0, 16),
+                  },
                 });
                 break;
               }
+            }
+
+            if (!isAssetPurchase) {
+              // Only count non-asset-purchase debits as regular spending
+              totalExpenses += txn.amount;
+              const cat = categorizeTransaction(txn.narration);
+              spendingMap[cat] = (spendingMap[cat] || 0) + txn.amount;
             }
           }
         }
       }
     }
+  }
+
+  // Add physical asset market values to totalAssets and allocation
+  let physicalAssetTotal = 0;
+  const physicalAllocation = {};
+  for (const a of assetsDetected) {
+    physicalAssetTotal += a.marketValue;
+    const bucket = a.category;
+    physicalAllocation[bucket] = (physicalAllocation[bucket] || 0) + a.marketValue;
+  }
+  totalAssets += physicalAssetTotal;
+  for (const [bucket, val] of Object.entries(physicalAllocation)) {
+    allocation[bucket] = (allocation[bucket] || 0) + val;
   }
 
   const netWorth = totalAssets - totalLiabilities;
@@ -1028,7 +1068,7 @@ function buildDashboard(user) {
 
   return {
     user: { id: user.id, name: user.name, phone: user.phone, email: user.email, pan: user.pan },
-    netWorth, totalAssets, totalLiabilities,
+    netWorth, totalAssets, totalLiabilities, physicalAssetTotal,
     totalIncome, totalExpenses,
     savingsRate: totalIncome > 0 ? ((totalIncome - totalExpenses) / totalIncome) * 100 : 0,
     accountCount: user.accounts.length,

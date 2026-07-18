@@ -457,3 +457,12 @@ header { padding: 28px 0 16px; border-bottom: 1px solid var(--border-glass); mar
 .ais-gain { color: var(--accent-emerald) !important; }
 .ais-loss { color: var(--accent-rose) !important; }
 
+/* Tokenization Details */
+.token-details { margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(139,92,246,0.15); }
+.td-row { display: flex; justify-content: space-between; align-items: center; padding: 2px 0; }
+.td-label { font-size: 0.58rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; }
+.td-value { font-size: 0.62rem; color: var(--accent-violet); font-weight: 600; text-align: right; }
+.td-hash { font-family: var(--font-mono); font-size: 0.56rem; color: var(--text-muted); letter-spacing: 0.02em; }
+
+/* Hero badge cyan */
+.hb-value--cyan { color: var(--accent-cyan); }

@@ -162,16 +162,19 @@
     const savings = d.totalIncome - d.totalExpenses;
     const totalAssets = d.totalAssets || d.netWorth;
     const totalLiabilities = d.totalLiabilities || 0;
+    const physicalAssets = d.physicalAssetTotal || 0;
+    const financialAssets = totalAssets - physicalAssets;
     $('#heroCard').innerHTML = `
       <div class="hero-label">Total Net Worth (Assets − Liabilities)</div>
       <div class="hero-value">${fmt(d.netWorth)}</div>
-      <div class="hero-sub">Across ${d.accountCount} financial accounts</div>
+      <div class="hero-sub">Across ${d.accountCount} financial accounts + ${(d.assets || []).length} physical assets</div>
       <div class="hero-badges">
+        <div class="hero-badge"><span class="hb-label">Financial Assets</span><span class="hb-value hb-value--green">${fmt(financialAssets)}</span></div>
+        <div class="hero-badge"><span class="hb-label">Physical Assets</span><span class="hb-value hb-value--cyan">${fmt(physicalAssets)}</span></div>
         <div class="hero-badge"><span class="hb-label">Total Assets</span><span class="hb-value hb-value--green">${fmt(totalAssets)}</span></div>
         <div class="hero-badge"><span class="hb-label">Total Liabilities</span><span class="hb-value hb-value--red">${fmt(totalLiabilities)}</span></div>
         <div class="hero-badge"><span class="hb-label">Lifetime Income</span><span class="hb-value hb-value--green">${fmt(d.lifetimeIncome || 0)}</span></div>
         <div class="hero-badge"><span class="hb-label">Lifetime Expenses</span><span class="hb-value hb-value--red">${fmt(d.lifetimeExpenses || 0)}</span></div>
-        <div class="hero-badge"><span class="hb-label">Lifetime Savings</span><span class="hb-value ${(d.lifetimeSavings || 0) >= 0 ? 'hb-value--green' : 'hb-value--red'}">${fmt(d.lifetimeSavings || 0)}</span></div>
       </div>
     `;
 
@@ -500,7 +503,7 @@
                 <div class="asset-card">
                   <div class="asset-icon-title"><span>${icon}</span> <span>${name}</span></div>
                   <div class="asset-value">${fmt(mv)}</div>
-                  <div class="asset-purchase">Bought: ${fmt(pp)} · ${a.purchaseDate || ''}</div>
+                  <div class="asset-purchase">Bought: ${fmt(pp)} · ${a.purchaseDate || ''}${a.yearsHeld ? ' · ' + a.yearsHeld + ' yrs' : ''}</div>
                   <div class="asset-gain ${gainClass}">${gainLoss >= 0 ? '+' : ''}${fmt(Math.abs(gainLoss))} <span class="asset-cagr ${cagrClass}">${cagrText} CAGR</span></div>
                   <div class="asset-badges">
                     <div class="asset-badge ${isVerified ? 'badge-verified' : 'badge-detected'}">
@@ -508,6 +511,18 @@
                     </div>
                     ${a.tokenId ? '<div class="asset-badge token-badge">' + tokenDisplay + '</div>' : ''}
                   </div>
+                  ${a.tokenization ? `
+                  <div class="token-details">
+                    <div class="td-row"><span class="td-label">Standard</span><span class="td-value">${a.tokenization.standard}</span></div>
+                    <div class="td-row"><span class="td-label">Total Supply</span><span class="td-value">${a.tokenization.totalSupply.toLocaleString()} tokens</span></div>
+                    <div class="td-row"><span class="td-label">Token Value</span><span class="td-value">${fmt(a.tokenization.tokenValue)}</span></div>
+                    ${a.tokenization.minInvestment ? '<div class="td-row"><span class="td-label">Min Investment</span><span class="td-value">' + fmt(a.tokenization.minInvestment) + '</span></div>' : ''}
+                    <div class="td-row"><span class="td-label">Divisibility</span><span class="td-value">${a.tokenization.fractionalLabel}</span></div>
+                    <div class="td-row"><span class="td-label">Lock-in</span><span class="td-value">${a.tokenization.lockInMonths > 0 ? a.tokenization.lockInMonths + ' months' : 'None'}</span></div>
+                    <div class="td-row"><span class="td-label">KYC</span><span class="td-value">${a.tokenization.kycRequired ? '✅ Required' : '—'}</span></div>
+                    <div class="td-row"><span class="td-label">Jurisdiction</span><span class="td-value">${a.tokenization.jurisdiction}</span></div>
+                    <div class="td-row"><span class="td-label">Hash</span><span class="td-value td-hash">${a.tokenization.metadataHash}</span></div>
+                  </div>` : ''}
                 </div>
               `;
             }).join('')}
