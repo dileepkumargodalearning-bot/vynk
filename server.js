@@ -27,6 +27,110 @@ const TEST_USERS = [
         fipId: 'HDFC-FIP', fipName: 'HDFC Bank',
         summary: { currentBalance: 245680.75, type: 'SAVINGS', currency: 'INR', ifscCode: 'HDFC0001234', branch: 'MG Road Branch', status: 'ACTIVE', openingDate: '2018-03-20' },
         transactions: [
+            {
+    "date": "2019-05-12",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 12500000,
+    "narration": "NEFT/PROPERTY/REGISTRATION/FLAT-MUMBAI",
+    "balance": 100000
+  },
+  {
+    "date": "2020-08-22",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 8500000,
+    "narration": "NEFT/PROPERTY/REGISTRATION/FLAT-BLR",
+    "balance": 100000
+  },
+  {
+    "date": "2021-11-05",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 4500000,
+    "narration": "NEFT/PROPERTY/REGISTRATION/PLOT-HYD",
+    "balance": 100000
+  },
+  {
+    "date": "2023-09-15",
+    "type": "DEBIT",
+    "mode": "UPI",
+    "amount": 140000,
+    "narration": "UPI/APPLE/IPHONE-15-PRO",
+    "balance": 100000
+  },
+  {
+    "date": "2022-04-10",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 1850000,
+    "narration": "NEFT/SHOWROOM/HONDA-CITY-HYBRID",
+    "balance": 100000
+  },
+  {
+    "date": "2023-12-01",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 2450000,
+    "narration": "NEFT/SHOWROOM/TATA-SAFARI",
+    "balance": 100000
+  },
+  {
+    "date": "2023-01-20",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 1750000,
+    "narration": "NEFT/TANISHQ/GOLD-BAR-250G",
+    "balance": 100000
+  },
+  {
+    "date": "2022-06-18",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 1250000,
+    "narration": "NEFT/ETHOS/ROLEX-DAYTONA",
+    "balance": 100000
+  },
+  {
+    "date": "2023-11-10",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 850000,
+    "narration": "NEFT/ETHOS/OMEGA-SPEEDMASTER",
+    "balance": 100000
+  },
+  {
+    "date": "2021-02-14",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 3500000,
+    "narration": "NEFT/SOTHEBY/PAINTING-HUSSAIN",
+    "balance": 100000
+  },
+  {
+    "date": "2022-08-30",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 2800000,
+    "narration": "NEFT/CHRISTIE/ART-PIECE-RAZA",
+    "balance": 100000
+  },
+  {
+    "date": "2024-02-14",
+    "type": "DEBIT",
+    "mode": "UPI",
+    "amount": 250000,
+    "narration": "UPI/LOUIS-VUITTON/DESIGNER-BAG",
+    "balance": 100000
+  },
+  {
+    "date": "2023-10-25",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 1550000,
+    "narration": "NEFT/MALABAR-GOLD/DIAMOND-NECKLACE",
+    "balance": 100000
+  },
           { date: '2024-06-01', type: 'CREDIT', mode: 'UPI', amount: 85000, narration: 'UPI/SALARY/JUNE2024/ACME-CORP', balance: 198500.25 },
           { date: '2024-06-02', type: 'DEBIT', mode: 'UPI', amount: 1200, narration: 'UPI/SWIGGY/ORDER-98765', balance: 197300.25 },
           { date: '2024-06-03', type: 'DEBIT', mode: 'UPI', amount: 2500, narration: 'UPI/ZOMATO/ORDER-456789', balance: 194800.25 },
@@ -127,6 +231,110 @@ const TEST_USERS = [
         fipId: 'ICICI-FIP', fipName: 'ICICI Bank',
         summary: { currentBalance: 85320.50, type: 'SAVINGS', currency: 'INR', ifscCode: 'ICIC0001234', branch: 'Bandra West Branch', status: 'ACTIVE', openingDate: '2020-01-15' },
         transactions: [
+            {
+    "date": "2019-05-12",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 12500000,
+    "narration": "NEFT/PROPERTY/REGISTRATION/FLAT-MUMBAI",
+    "balance": 100000
+  },
+  {
+    "date": "2020-08-22",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 8500000,
+    "narration": "NEFT/PROPERTY/REGISTRATION/FLAT-BLR",
+    "balance": 100000
+  },
+  {
+    "date": "2021-11-05",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 4500000,
+    "narration": "NEFT/PROPERTY/REGISTRATION/PLOT-HYD",
+    "balance": 100000
+  },
+  {
+    "date": "2023-09-15",
+    "type": "DEBIT",
+    "mode": "UPI",
+    "amount": 140000,
+    "narration": "UPI/APPLE/IPHONE-15-PRO",
+    "balance": 100000
+  },
+  {
+    "date": "2022-04-10",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 1850000,
+    "narration": "NEFT/SHOWROOM/HONDA-CITY-HYBRID",
+    "balance": 100000
+  },
+  {
+    "date": "2023-12-01",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 2450000,
+    "narration": "NEFT/SHOWROOM/TATA-SAFARI",
+    "balance": 100000
+  },
+  {
+    "date": "2023-01-20",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 1750000,
+    "narration": "NEFT/TANISHQ/GOLD-BAR-250G",
+    "balance": 100000
+  },
+  {
+    "date": "2022-06-18",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 1250000,
+    "narration": "NEFT/ETHOS/ROLEX-DAYTONA",
+    "balance": 100000
+  },
+  {
+    "date": "2023-11-10",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 850000,
+    "narration": "NEFT/ETHOS/OMEGA-SPEEDMASTER",
+    "balance": 100000
+  },
+  {
+    "date": "2021-02-14",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 3500000,
+    "narration": "NEFT/SOTHEBY/PAINTING-HUSSAIN",
+    "balance": 100000
+  },
+  {
+    "date": "2022-08-30",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 2800000,
+    "narration": "NEFT/CHRISTIE/ART-PIECE-RAZA",
+    "balance": 100000
+  },
+  {
+    "date": "2024-02-14",
+    "type": "DEBIT",
+    "mode": "UPI",
+    "amount": 250000,
+    "narration": "UPI/LOUIS-VUITTON/DESIGNER-BAG",
+    "balance": 100000
+  },
+  {
+    "date": "2023-10-25",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 1550000,
+    "narration": "NEFT/MALABAR-GOLD/DIAMOND-NECKLACE",
+    "balance": 100000
+  },
           { date: '2024-06-01', type: 'CREDIT', mode: 'NEFT', amount: 65000, narration: 'NEFT/SALARY/JUNE2024/INFOSYS', balance: 98320.50 },
           { date: '2024-06-03', type: 'DEBIT', mode: 'UPI', amount: 780, narration: 'UPI/SWIGGY/ORDER-SWG123', balance: 97540.50 },
           { date: '2024-06-05', type: 'DEBIT', mode: 'UPI', amount: 18000, narration: 'UPI/RENT/JUNE2024/FLATOWNER', balance: 79540.50 },
@@ -209,6 +417,110 @@ const TEST_USERS = [
         fipId: 'AXIS-FIP', fipName: 'Axis Bank',
         summary: { currentBalance: 1245000, type: 'SAVINGS', currency: 'INR', ifscCode: 'UTIB0001234', branch: 'CG Road Branch', status: 'ACTIVE', openingDate: '2012-01-10' },
         transactions: [
+            {
+    "date": "2019-05-12",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 12500000,
+    "narration": "NEFT/PROPERTY/REGISTRATION/FLAT-MUMBAI",
+    "balance": 100000
+  },
+  {
+    "date": "2020-08-22",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 8500000,
+    "narration": "NEFT/PROPERTY/REGISTRATION/FLAT-BLR",
+    "balance": 100000
+  },
+  {
+    "date": "2021-11-05",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 4500000,
+    "narration": "NEFT/PROPERTY/REGISTRATION/PLOT-HYD",
+    "balance": 100000
+  },
+  {
+    "date": "2023-09-15",
+    "type": "DEBIT",
+    "mode": "UPI",
+    "amount": 140000,
+    "narration": "UPI/APPLE/IPHONE-15-PRO",
+    "balance": 100000
+  },
+  {
+    "date": "2022-04-10",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 1850000,
+    "narration": "NEFT/SHOWROOM/HONDA-CITY-HYBRID",
+    "balance": 100000
+  },
+  {
+    "date": "2023-12-01",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 2450000,
+    "narration": "NEFT/SHOWROOM/TATA-SAFARI",
+    "balance": 100000
+  },
+  {
+    "date": "2023-01-20",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 1750000,
+    "narration": "NEFT/TANISHQ/GOLD-BAR-250G",
+    "balance": 100000
+  },
+  {
+    "date": "2022-06-18",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 1250000,
+    "narration": "NEFT/ETHOS/ROLEX-DAYTONA",
+    "balance": 100000
+  },
+  {
+    "date": "2023-11-10",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 850000,
+    "narration": "NEFT/ETHOS/OMEGA-SPEEDMASTER",
+    "balance": 100000
+  },
+  {
+    "date": "2021-02-14",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 3500000,
+    "narration": "NEFT/SOTHEBY/PAINTING-HUSSAIN",
+    "balance": 100000
+  },
+  {
+    "date": "2022-08-30",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 2800000,
+    "narration": "NEFT/CHRISTIE/ART-PIECE-RAZA",
+    "balance": 100000
+  },
+  {
+    "date": "2024-02-14",
+    "type": "DEBIT",
+    "mode": "UPI",
+    "amount": 250000,
+    "narration": "UPI/LOUIS-VUITTON/DESIGNER-BAG",
+    "balance": 100000
+  },
+  {
+    "date": "2023-10-25",
+    "type": "DEBIT",
+    "mode": "NEFT",
+    "amount": 1550000,
+    "narration": "NEFT/MALABAR-GOLD/DIAMOND-NECKLACE",
+    "balance": 100000
+  },
           { date: '2024-06-01', type: 'CREDIT', mode: 'NEFT', amount: 350000, narration: 'NEFT/SALARY/JUNE2024/TCS-LTD', balance: 1095000 },
           { date: '2024-06-03', type: 'DEBIT', mode: 'NEFT', amount: 45000, narration: 'NEFT/RENT/JUNE2024/PREMIUM-APT', balance: 1050000 },
           { date: '2024-06-05', type: 'DEBIT', mode: 'NACH', amount: 52000, narration: 'NACH/EMI/HOME-LOAN/HDFC-LTD', balance: 998000 },
@@ -334,7 +646,242 @@ const SPENDING_CATEGORIES = [
   { key: 'other', label: '📋 Other', icon: '📋', color: '#94a3b8', keywords: [] },
 ];
 
-const VERIFIED_RECEIPTS = [];
+const VERIFIED_RECEIPTS = [
+  {
+    "userId": "user-001",
+    "amount": 12500000,
+    "date": "2019-05-12",
+    "merchant": "PROPERTY"
+  },
+  {
+    "userId": "user-001",
+    "amount": 8500000,
+    "date": "2020-08-22",
+    "merchant": "PROPERTY"
+  },
+  {
+    "userId": "user-001",
+    "amount": 4500000,
+    "date": "2021-11-05",
+    "merchant": "PROPERTY"
+  },
+  {
+    "userId": "user-001",
+    "amount": 140000,
+    "date": "2023-09-15",
+    "merchant": "APPLE"
+  },
+  {
+    "userId": "user-001",
+    "amount": 1850000,
+    "date": "2022-04-10",
+    "merchant": "SHOWROOM"
+  },
+  {
+    "userId": "user-001",
+    "amount": 2450000,
+    "date": "2023-12-01",
+    "merchant": "SHOWROOM"
+  },
+  {
+    "userId": "user-001",
+    "amount": 1750000,
+    "date": "2023-01-20",
+    "merchant": "TANISHQ"
+  },
+  {
+    "userId": "user-001",
+    "amount": 1250000,
+    "date": "2022-06-18",
+    "merchant": "ETHOS"
+  },
+  {
+    "userId": "user-001",
+    "amount": 850000,
+    "date": "2023-11-10",
+    "merchant": "ETHOS"
+  },
+  {
+    "userId": "user-001",
+    "amount": 3500000,
+    "date": "2021-02-14",
+    "merchant": "SOTHEBY"
+  },
+  {
+    "userId": "user-001",
+    "amount": 2800000,
+    "date": "2022-08-30",
+    "merchant": "CHRISTIE"
+  },
+  {
+    "userId": "user-001",
+    "amount": 250000,
+    "date": "2024-02-14",
+    "merchant": "LOUIS-VUITTON"
+  },
+  {
+    "userId": "user-001",
+    "amount": 1550000,
+    "date": "2023-10-25",
+    "merchant": "MALABAR-GOLD"
+  },
+  {
+    "userId": "user-002",
+    "amount": 12500000,
+    "date": "2019-05-12",
+    "merchant": "PROPERTY"
+  },
+  {
+    "userId": "user-002",
+    "amount": 8500000,
+    "date": "2020-08-22",
+    "merchant": "PROPERTY"
+  },
+  {
+    "userId": "user-002",
+    "amount": 4500000,
+    "date": "2021-11-05",
+    "merchant": "PROPERTY"
+  },
+  {
+    "userId": "user-002",
+    "amount": 140000,
+    "date": "2023-09-15",
+    "merchant": "APPLE"
+  },
+  {
+    "userId": "user-002",
+    "amount": 1850000,
+    "date": "2022-04-10",
+    "merchant": "SHOWROOM"
+  },
+  {
+    "userId": "user-002",
+    "amount": 2450000,
+    "date": "2023-12-01",
+    "merchant": "SHOWROOM"
+  },
+  {
+    "userId": "user-002",
+    "amount": 1750000,
+    "date": "2023-01-20",
+    "merchant": "TANISHQ"
+  },
+  {
+    "userId": "user-002",
+    "amount": 1250000,
+    "date": "2022-06-18",
+    "merchant": "ETHOS"
+  },
+  {
+    "userId": "user-002",
+    "amount": 850000,
+    "date": "2023-11-10",
+    "merchant": "ETHOS"
+  },
+  {
+    "userId": "user-002",
+    "amount": 3500000,
+    "date": "2021-02-14",
+    "merchant": "SOTHEBY"
+  },
+  {
+    "userId": "user-002",
+    "amount": 2800000,
+    "date": "2022-08-30",
+    "merchant": "CHRISTIE"
+  },
+  {
+    "userId": "user-002",
+    "amount": 250000,
+    "date": "2024-02-14",
+    "merchant": "LOUIS-VUITTON"
+  },
+  {
+    "userId": "user-002",
+    "amount": 1550000,
+    "date": "2023-10-25",
+    "merchant": "MALABAR-GOLD"
+  },
+  {
+    "userId": "user-003",
+    "amount": 12500000,
+    "date": "2019-05-12",
+    "merchant": "PROPERTY"
+  },
+  {
+    "userId": "user-003",
+    "amount": 8500000,
+    "date": "2020-08-22",
+    "merchant": "PROPERTY"
+  },
+  {
+    "userId": "user-003",
+    "amount": 4500000,
+    "date": "2021-11-05",
+    "merchant": "PROPERTY"
+  },
+  {
+    "userId": "user-003",
+    "amount": 140000,
+    "date": "2023-09-15",
+    "merchant": "APPLE"
+  },
+  {
+    "userId": "user-003",
+    "amount": 1850000,
+    "date": "2022-04-10",
+    "merchant": "SHOWROOM"
+  },
+  {
+    "userId": "user-003",
+    "amount": 2450000,
+    "date": "2023-12-01",
+    "merchant": "SHOWROOM"
+  },
+  {
+    "userId": "user-003",
+    "amount": 1750000,
+    "date": "2023-01-20",
+    "merchant": "TANISHQ"
+  },
+  {
+    "userId": "user-003",
+    "amount": 1250000,
+    "date": "2022-06-18",
+    "merchant": "ETHOS"
+  },
+  {
+    "userId": "user-003",
+    "amount": 850000,
+    "date": "2023-11-10",
+    "merchant": "ETHOS"
+  },
+  {
+    "userId": "user-003",
+    "amount": 3500000,
+    "date": "2021-02-14",
+    "merchant": "SOTHEBY"
+  },
+  {
+    "userId": "user-003",
+    "amount": 2800000,
+    "date": "2022-08-30",
+    "merchant": "CHRISTIE"
+  },
+  {
+    "userId": "user-003",
+    "amount": 250000,
+    "date": "2024-02-14",
+    "merchant": "LOUIS-VUITTON"
+  },
+  {
+    "userId": "user-003",
+    "amount": 1550000,
+    "date": "2023-10-25",
+    "merchant": "MALABAR-GOLD"
+  }
+];
 
 const ASSET_MODELS = [
   { category: 'Real Estate', type: 'RE', keywords: ['PROPERTY', 'REGISTRATION', 'STAMP-DUTY', 'HOUSING', 'PLOT', 'LAND', 'FLAT'], minAmount: 500000, model: (val, yrs) => val * Math.pow(1 + 0.10, yrs) },
