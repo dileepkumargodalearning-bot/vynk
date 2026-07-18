@@ -22,6 +22,9 @@
       </div>
       <div class="header-right">
         <div class="user-selector">
+          <button class="btn btn--outline btn--sm" id="btnHome" style="display:none" title="Back to user selection">
+            <span>🏠</span> Home
+          </button>
           <label for="userSelect">Test User:</label>
           <select id="userSelect" class="custom-select">
             <option value="">— Select User —</option>
@@ -121,8 +124,8 @@
           </form>
           <div id="uploadStatus" class="upload-status"></div>
         </div>
-        <div class="assets-grid mt-4" id="assetIntelGrid">
-          <!-- Rendered via JS -->
+        <div id="assetIntelContainer" class="mt-4">
+          <!-- Grouped asset classes rendered via JS -->
         </div>
         <div class="asset-intel-summary mt-4" id="assetIntelSummary">
           <!-- Rendered via JS -->

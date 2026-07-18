@@ -63,6 +63,14 @@
     $('#btnFetch').disabled = !this.value;
   });
   $('#btnFetch').addEventListener('click', fetchData);
+  $('#btnHome').addEventListener('click', function () {
+    $('#dashboard').style.display = 'none';
+    $('#emptyState').style.display = 'block';
+    $('#btnHome').style.display = 'none';
+    $('#userSelect').value = '';
+    $('#btnFetch').disabled = true;
+    dashData = null;
+  });
 
   // Receipt Upload Form
   $('#receiptForm').addEventListener('submit', async function(e) {
@@ -124,6 +132,7 @@
 
       renderDashboard(dashData);
       $('#dashboard').style.display = 'block';
+      $('#btnHome').style.display = 'inline-flex';
     } catch (e) {
       alert('Failed: ' + e.message);
       $('#emptyState').style.display = 'block';
@@ -274,45 +283,8 @@
       $('#liabilitiesSection').innerHTML = '<p style="color:var(--text-muted);font-size:0.82rem">No outstanding loans.</p>';
     }
 
-    // Asset Intelligence
-    if (d.assets && d.assets.length > 0) {
-      const grid = $('#assetIntelGrid');
-      let totalValue = 0;
-      let totalCagr = 0;
-      
-      grid.innerHTML = d.assets.map((a) => {
-        totalValue += (a.currentValue || 0);
-        totalCagr += (a.cagr || 0);
-        const isVerified = a.status === 'VERIFIED';
-        const cagrClass = a.cagr >= 0 ? 'cagr-positive' : 'cagr-negative';
-        const cagrText = (a.cagr > 0 ? '+' : '') + a.cagr + '% CAGR';
-        const tokenDisplay = a.tokenId ? a.tokenId : 'VNK-TKN-PENDING';
-        
-        return `
-          <div class="asset-card">
-            <div class="asset-icon-title"><span>${a.icon || '📦'}</span> <span>${a.name || a.category}</span></div>
-            <div class="asset-value">${fmt(a.currentValue || 0)}</div>
-            <div class="asset-cagr ${cagrClass}">${cagrText}</div>
-            <div class="asset-badges">
-              <div class="asset-badge ${isVerified ? 'badge-verified' : 'badge-detected'}">
-                ${isVerified ? '✅ Verified' : '⏳ Detected'}
-              </div>
-              <div class="asset-badge token-badge">${tokenDisplay}</div>
-            </div>
-          </div>
-        `;
-      }).join('');
-      
-      const avgCagr = d.assets.length > 0 ? (totalCagr / d.assets.length).toFixed(1) : 0;
-      $('#assetIntelSummary').innerHTML = `
-        <span>Total Asset Portfolio: ${fmt(totalValue)}</span>
-        <span>|</span>
-        <span>Avg CAGR: ${(avgCagr > 0 ? '+' : '')}${avgCagr}%</span>
-      `;
-    } else {
-      $('#assetIntelGrid').innerHTML = '<p style="color:var(--text-muted);font-size:0.82rem;grid-column:1/-1;text-align:center;">No assets detected.</p>';
-      $('#assetIntelSummary').innerHTML = '';
-    }
+    // Asset Intelligence — grouped by class
+    renderAssetIntelligence(d);
 
     // Year-wise Earnings & Expenses
     const yf = d.yearlyFinancials || [];
@@ -424,6 +396,139 @@
           <td class="text-sm" style="max-width:200px">${t.narration || ''}</td>
         </tr>`;
     }).join('');
+  }
+
+  // ---- Asset Intelligence Renderer (grouped by class) ----
+  const ASSET_CLASSES = {
+    'Real Estate': { icon: '🏠', label: 'Real Estate', items: ['FLAT', 'PLOT', 'VILLA', 'PROPERTY', 'LAND', '2BHK', '3BHK', '4BHK', 'HOUSE'] },
+    'Vehicles': { icon: '🚗', label: 'Vehicles & Yachts', items: ['CAR', 'SHOWROOM', 'HONDA', 'TOYOTA', 'TATA', 'MARUTI', 'HYUNDAI', 'INNOVA', 'FORTUNER', 'SAFARI', 'YACHT', 'CITY'] },
+    'Gold & Jewellery': { icon: '💎', label: 'Gold & Jewellery', items: ['GOLD', 'TANISHQ', 'MALABAR', 'KALYAN', 'JEWEL', 'DIAMOND', 'NECKLACE', 'CHAIN'] },
+    'Luxury Watches': { icon: '⌚', label: 'Luxury Watches', items: ['ROLEX', 'OMEGA', 'ETHOS', 'WATCH', 'DAYTONA', 'SPEEDMASTER', 'SUBMARINER'] },
+    'Art & Collectibles': { icon: '🎨', label: 'Art & Collectibles', items: ['SOTHEBY', 'CHRISTIE', 'ART', 'PAINTING', 'HUSSAIN', 'RAZA'] },
+    'Electronics': { icon: '📱', label: 'Electronics & Gadgets', items: ['APPLE', 'IPHONE', 'MACBOOK', 'SAMSUNG', 'CROMA'] },
+    'Luxury & Fashion': { icon: '👜', label: 'Luxury & Fashion', items: ['LOUIS-VUITTON', 'GUCCI', 'HERMES', 'DESIGNER'] },
+  };
+
+  function getAssetName(narration) {
+    const parts = (narration || '').split('/');
+    const last = parts[parts.length - 1] || '';
+    return last.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  function getAssetIcon(category) {
+    const icons = { 'Real Estate': '🏠', 'Vehicle': '🚗', 'Jewellery/Gold': '💎', 'Luxury Watch': '⌚', 'Art/Collectibles': '🎨', 'Electronics': '📱' };
+    return icons[category] || '📦';
+  }
+
+  function classifyAsset(a) {
+    const narr = (a.narration || '').toUpperCase();
+    for (const [className, cls] of Object.entries(ASSET_CLASSES)) {
+      if (cls.items.some(kw => narr.includes(kw))) return className;
+    }
+    // Fallback by category
+    const catMap = { 'Real Estate': 'Real Estate', 'Vehicle': 'Vehicles', 'Jewellery/Gold': 'Gold & Jewellery', 'Luxury Watch': 'Luxury Watches', 'Art/Collectibles': 'Art & Collectibles', 'Electronics': 'Electronics' };
+    return catMap[a.category] || 'Other';
+  }
+
+  function renderAssetIntelligence(d) {
+    const container = $('#assetIntelContainer');
+    if (!d.assets || d.assets.length === 0) {
+      container.innerHTML = '<p style="color:var(--text-muted);font-size:0.82rem;text-align:center;">No assets detected from transactions.</p>';
+      $('#assetIntelSummary').innerHTML = '';
+      return;
+    }
+
+    // Group assets by class
+    const groups = {};
+    let totalValue = 0;
+    let totalPurchase = 0;
+    let weightedCagr = 0;
+
+    d.assets.forEach(a => {
+      const cls = classifyAsset(a);
+      if (!groups[cls]) groups[cls] = { assets: [], totalValue: 0, totalPurchase: 0 };
+      const mv = a.marketValue || 0;
+      const pp = a.purchasePrice || 0;
+      groups[cls].assets.push(a);
+      groups[cls].totalValue += mv;
+      groups[cls].totalPurchase += pp;
+      totalValue += mv;
+      totalPurchase += pp;
+      weightedCagr += (a.cagr || 0) * mv;
+    });
+
+    const classOrder = ['Real Estate', 'Vehicles', 'Gold & Jewellery', 'Luxury Watches', 'Art & Collectibles', 'Electronics', 'Luxury & Fashion', 'Other'];
+    const sortedClasses = classOrder.filter(c => groups[c]);
+    // Add any remaining classes
+    Object.keys(groups).forEach(c => { if (!sortedClasses.includes(c)) sortedClasses.push(c); });
+
+    let html = '';
+    sortedClasses.forEach(className => {
+      const g = groups[className];
+      const classInfo = ASSET_CLASSES[className] || { icon: '📦', label: className };
+      const classCagr = g.totalPurchase > 0 ? (((g.totalValue / g.totalPurchase) - 1) * 100) : 0;
+      const classCagrClass = classCagr >= 0 ? 'cagr-positive' : 'cagr-negative';
+
+      html += `
+        <div class="asset-class-group">
+          <div class="asset-class-header">
+            <div class="asset-class-title">
+              <span class="asset-class-icon">${classInfo.icon}</span>
+              <span>${classInfo.label}</span>
+              <span class="asset-class-count">${g.assets.length} item${g.assets.length > 1 ? 's' : ''}</span>
+            </div>
+            <div class="asset-class-totals">
+              <span class="asset-class-value">${fmt(g.totalValue)}</span>
+              <span class="asset-class-cagr ${classCagrClass}">${classCagr >= 0 ? '+' : ''}${classCagr.toFixed(1)}%</span>
+            </div>
+          </div>
+          <div class="assets-grid">
+            ${g.assets.map(a => {
+              const mv = a.marketValue || 0;
+              const pp = a.purchasePrice || 0;
+              const cagr = a.cagr || 0;
+              const isVerified = a.status === 'VERIFIED';
+              const cagrClass = cagr >= 0 ? 'cagr-positive' : 'cagr-negative';
+              const cagrText = (cagr > 0 ? '+' : '') + cagr.toFixed(1) + '%';
+              const tokenDisplay = a.tokenId ? a.tokenId : '—';
+              const name = getAssetName(a.narration);
+              const icon = getAssetIcon(a.category);
+              const gainLoss = mv - pp;
+              const gainClass = gainLoss >= 0 ? 'gain-positive' : 'gain-negative';
+
+              return `
+                <div class="asset-card">
+                  <div class="asset-icon-title"><span>${icon}</span> <span>${name}</span></div>
+                  <div class="asset-value">${fmt(mv)}</div>
+                  <div class="asset-purchase">Bought: ${fmt(pp)} · ${a.purchaseDate || ''}</div>
+                  <div class="asset-gain ${gainClass}">${gainLoss >= 0 ? '+' : ''}${fmt(Math.abs(gainLoss))} <span class="asset-cagr ${cagrClass}">${cagrText} CAGR</span></div>
+                  <div class="asset-badges">
+                    <div class="asset-badge ${isVerified ? 'badge-verified' : 'badge-detected'}">
+                      ${isVerified ? '✅ Verified' : '⏳ Detected'}
+                    </div>
+                    ${a.tokenId ? '<div class="asset-badge token-badge">' + tokenDisplay + '</div>' : ''}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+
+    const avgCagr = totalValue > 0 ? (weightedCagr / totalValue).toFixed(1) : '0.0';
+    const totalGain = totalValue - totalPurchase;
+    const totalGainPct = totalPurchase > 0 ? (((totalValue / totalPurchase) - 1) * 100).toFixed(1) : '0.0';
+    $('#assetIntelSummary').innerHTML = `
+      <div class="ais-item"><span class="ais-label">Total Physical Assets</span><span class="ais-value">${fmt(totalValue)}</span></div>
+      <div class="ais-item"><span class="ais-label">Total Invested</span><span class="ais-value">${fmt(totalPurchase)}</span></div>
+      <div class="ais-item"><span class="ais-label">Total Gain/Loss</span><span class="ais-value ${totalGain >= 0 ? 'ais-gain' : 'ais-loss'}">${totalGain >= 0 ? '+' : ''}${fmt(Math.abs(totalGain))} (${totalGainPct}%)</span></div>
+      <div class="ais-item"><span class="ais-label">Avg CAGR</span><span class="ais-value ${avgCagr >= 0 ? 'ais-gain' : 'ais-loss'}">${avgCagr >= 0 ? '+' : ''}${avgCagr}%</span></div>
+      <div class="ais-item"><span class="ais-label">Assets Detected</span><span class="ais-value">${d.assets.length}</span></div>
+      <div class="ais-item"><span class="ais-label">Tokenized</span><span class="ais-value">${d.assets.filter(a => a.tokenId).length}</span></div>
+    `;
   }
 
   // ---- Init ----
