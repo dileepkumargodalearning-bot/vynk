@@ -64,16 +64,64 @@
   });
   $('#btnFetch').addEventListener('click', fetchData);
 
+  // Receipt Upload Form
+  $('#receiptForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const uid = $('#userSelect').value;
+    if (!uid) return;
+    
+    const fileInput = $('#receiptFile');
+    if (!fileInput.files.length) return;
+    
+    const statusEl = $('#uploadStatus');
+    statusEl.textContent = 'Uploading & verifying...';
+    statusEl.style.color = 'var(--text-secondary)';
+    
+    // Demo payload for reconciliation based on user
+    let dummyBody = { merchant: 'TANISHQ', amount: 285000, date: '2024-01-10', phone: '9876543210' };
+    if (uid === 'user-003') dummyBody = { merchant: 'ETHOS', amount: 485000, date: '2022-11-05', phone: '7654321098' };
+    if (uid === 'user-002') dummyBody = { merchant: 'APPLE', amount: 145000, date: '2024-03-08', phone: '8765432109' };
+
+    try {
+      const res = await fetch('/api/assets/' + uid + '/upload-receipt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dummyBody)
+      });
+      if (res.ok) {
+        statusEl.textContent = 'Receipt matched! Asset verified & tokenized.';
+        statusEl.style.color = 'var(--accent-emerald)';
+        fetchData();
+      } else {
+        const data = await res.json();
+        statusEl.textContent = 'Verification failed: ' + (data.error || 'Unknown error');
+        statusEl.style.color = 'var(--accent-rose)';
+      }
+    } catch (err) {
+      statusEl.textContent = 'Error: ' + err.message;
+      statusEl.style.color = 'var(--accent-rose)';
+    }
+  });
+
   async function fetchData() {
     const uid = $('#userSelect').value;
     if (!uid) return;
     $('#emptyState').style.display = 'none';
     $('#dashboard').style.display = 'none';
     $('#loader').classList.add('active');
+    if ($('#uploadStatus')) $('#uploadStatus').textContent = '';
 
     try {
       const res = await fetch('/api/users/' + uid + '/fetch');
       dashData = await res.json();
+
+      try {
+        const assetRes = await fetch('/api/assets/' + uid);
+        if (assetRes.ok) {
+          dashData.assets = await assetRes.json();
+        }
+      } catch(e) { console.warn('Assets fetch failed:', e); }
+
       renderDashboard(dashData);
       $('#dashboard').style.display = 'block';
     } catch (e) {
@@ -224,6 +272,46 @@
         </div>`;
     } else {
       $('#liabilitiesSection').innerHTML = '<p style="color:var(--text-muted);font-size:0.82rem">No outstanding loans.</p>';
+    }
+
+    // Asset Intelligence
+    if (d.assets && d.assets.length > 0) {
+      const grid = $('#assetIntelGrid');
+      let totalValue = 0;
+      let totalCagr = 0;
+      
+      grid.innerHTML = d.assets.map((a) => {
+        totalValue += (a.currentValue || 0);
+        totalCagr += (a.cagr || 0);
+        const isVerified = a.status === 'VERIFIED';
+        const cagrClass = a.cagr >= 0 ? 'cagr-positive' : 'cagr-negative';
+        const cagrText = (a.cagr > 0 ? '+' : '') + a.cagr + '% CAGR';
+        const tokenDisplay = a.tokenId ? a.tokenId : 'VNK-TKN-PENDING';
+        
+        return `
+          <div class="asset-card">
+            <div class="asset-icon-title"><span>${a.icon || '📦'}</span> <span>${a.name || a.category}</span></div>
+            <div class="asset-value">${fmt(a.currentValue || 0)}</div>
+            <div class="asset-cagr ${cagrClass}">${cagrText}</div>
+            <div class="asset-badges">
+              <div class="asset-badge ${isVerified ? 'badge-verified' : 'badge-detected'}">
+                ${isVerified ? '✅ Verified' : '⏳ Detected'}
+              </div>
+              <div class="asset-badge token-badge">${tokenDisplay}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      const avgCagr = d.assets.length > 0 ? (totalCagr / d.assets.length).toFixed(1) : 0;
+      $('#assetIntelSummary').innerHTML = `
+        <span>Total Asset Portfolio: ${fmt(totalValue)}</span>
+        <span>|</span>
+        <span>Avg CAGR: ${(avgCagr > 0 ? '+' : '')}${avgCagr}%</span>
+      `;
+    } else {
+      $('#assetIntelGrid').innerHTML = '<p style="color:var(--text-muted);font-size:0.82rem;grid-column:1/-1;text-align:center;">No assets detected.</p>';
+      $('#assetIntelSummary').innerHTML = '';
     }
 
     // Year-wise Earnings & Expenses

@@ -45,6 +45,9 @@ const TEST_USERS = [
           { date: '2024-06-18', type: 'DEBIT', mode: 'UPI', amount: 1800, narration: 'UPI/FUEL/HPCL-STATION', balance: 208880.75 },
           { date: '2024-06-20', type: 'DEBIT', mode: 'UPI', amount: 3200, narration: 'UPI/RESTAURANT/BARBEQUE-NATION', balance: 205680.75 },
           { date: '2024-06-25', type: 'CREDIT', mode: 'UPI', amount: 40000, narration: 'UPI/BONUS/ACME-CORP-Q2', balance: 245680.75 },
+          { date: '2021-03-15', type: 'DEBIT', mode: 'NEFT', amount: 4500000, narration: 'NEFT/PROPERTY/REGISTRATION/2BHK-WHITEFIELD', balance: 245680.75 },
+          { date: '2023-08-20', type: 'DEBIT', mode: 'NEFT', amount: 1250000, narration: 'NEFT/TOYOTA-SHOWROOM/INNOVA-CRYSTA', balance: 245680.75 },
+          { date: '2024-01-10', type: 'DEBIT', mode: 'UPI', amount: 285000, narration: 'UPI/TANISHQ/GOLD-CHAIN-22K', balance: 245680.75 },
         ],
       },
       {
@@ -136,6 +139,8 @@ const TEST_USERS = [
           { date: '2024-06-18', type: 'DEBIT', mode: 'UPI', amount: 950, narration: 'UPI/RECHARGE/AIRTEL-POSTPAID', balance: 76040.50 },
           { date: '2024-06-22', type: 'CREDIT', mode: 'UPI', amount: 12000, narration: 'UPI/REFUND/FLIPKART-RETURN', balance: 88040.50 },
           { date: '2024-06-28', type: 'DEBIT', mode: 'UPI', amount: 2720, narration: 'UPI/GROCERY/BIGBASKET-JUN', balance: 85320.50 },
+          { date: '2024-03-08', type: 'DEBIT', mode: 'UPI', amount: 145000, narration: 'UPI/APPLE/MACBOOK-PRO-M3', balance: 85320.50 },
+          { date: '2023-09-15', type: 'DEBIT', mode: 'UPI', amount: 95000, narration: 'UPI/TANISHQ/DIAMOND-PENDANT', balance: 85320.50 },
         ],
       },
       {
@@ -218,6 +223,10 @@ const TEST_USERS = [
           { date: '2024-06-25', type: 'CREDIT', mode: 'NEFT', amount: 250000, narration: 'NEFT/BONUS/TCS-ANNUAL-2024', balance: 1208000 },
           { date: '2024-06-28', type: 'DEBIT', mode: 'UPI', amount: 6500, narration: 'UPI/RESTAURANT/TAJ-VIVANTA', balance: 1201500 },
           { date: '2024-06-30', type: 'CREDIT', mode: 'INTERNAL', amount: 43500, narration: 'INT/SWEEP/SAVINGS-INTEREST-Q2', balance: 1245000 },
+          { date: '2018-06-10', type: 'DEBIT', mode: 'NEFT', amount: 12000000, narration: 'NEFT/PROPERTY/4BHK-VILLA-SG-HIGHWAY', balance: 1245000 },
+          { date: '2023-03-15', type: 'DEBIT', mode: 'NEFT', amount: 1850000, narration: 'NEFT/TOYOTA-SHOWROOM/FORTUNER-2023', balance: 1245000 },
+          { date: '2022-11-05', type: 'DEBIT', mode: 'NEFT', amount: 485000, narration: 'NEFT/ETHOS/ROLEX-SUBMARINER', balance: 1245000 },
+          { date: '2024-02-14', type: 'DEBIT', mode: 'UPI', amount: 320000, narration: 'UPI/MALABAR-GOLD/NECKLACE-22K', balance: 1245000 },
         ],
       },
       {
@@ -325,6 +334,17 @@ const SPENDING_CATEGORIES = [
   { key: 'other', label: '📋 Other', icon: '📋', color: '#94a3b8', keywords: [] },
 ];
 
+const VERIFIED_RECEIPTS = [];
+
+const ASSET_MODELS = [
+  { category: 'Real Estate', type: 'RE', keywords: ['PROPERTY', 'REGISTRATION', 'STAMP-DUTY', 'HOUSING', 'PLOT', 'LAND', 'FLAT'], minAmount: 500000, model: (val, yrs) => val * Math.pow(1 + 0.10, yrs) },
+  { category: 'Vehicle', type: 'VH', keywords: ['CAR', 'AUTOMOBILE', 'SHOWROOM', 'MARUTI', 'HYUNDAI', 'TOYOTA', 'TATA-MOTORS', 'HONDA', 'BAJAJ'], minAmount: 100000, model: (val, yrs) => val * Math.pow(1 - 0.15, yrs) },
+  { category: 'Luxury Watch', type: 'LX', keywords: ['ROLEX', 'OMEGA', 'TITAN-PREMIUM', 'ETHOS', 'WATCH'], minAmount: 50000, model: (val, yrs) => val * Math.pow(1 + 0.08, yrs) },
+  { category: 'Jewellery/Gold', type: 'JW', keywords: ['TANISHQ', 'KALYAN', 'MALABAR-GOLD', 'JEWEL', 'GOLD', 'PC-JEWELLER'], minAmount: 25000, model: (val, yrs) => val * Math.pow(1 + 0.10, yrs) },
+  { category: 'Electronics', type: 'EL', keywords: ['APPLE', 'SAMSUNG', 'CROMA', 'RELIANCE-DIGITAL', 'VIJAY-SALES'], minAmount: 20000, model: (val, yrs) => val * Math.pow(1 - 0.30, yrs) },
+  { category: 'Art/Collectibles', type: 'AR', keywords: ['AUCTION', 'SOTHEBY', 'CHRISTIE', 'ART-GALLERY'], minAmount: 50000, model: (val, yrs) => val * Math.pow(1 + 0.07, yrs) }
+];
+
 function categorizeTransaction(narration) {
   const upper = (narration || '').toUpperCase();
   for (const cat of SPENDING_CATEGORIES) {
@@ -351,6 +371,8 @@ function buildDashboard(user) {
   const spendingMap = {};
   const allTransactions = [];
   const accountSummaries = [];
+  const assetsDetected = [];
+  let tokenSerial = 1;
 
   for (const acc of user.accounts) {
     const isLoan = acc.fiType === 'LOAN';
@@ -394,6 +416,45 @@ function buildDashboard(user) {
             totalExpenses += txn.amount;
             const cat = categorizeTransaction(txn.narration);
             spendingMap[cat] = (spendingMap[cat] || 0) + txn.amount;
+
+            // Asset detection
+            for (const model of ASSET_MODELS) {
+              const narrationUpper = (txn.narration || '').toUpperCase();
+              if (txn.amount >= model.minAmount && model.keywords.some(kw => narrationUpper.includes(kw))) {
+                const txnDate = new Date(txn.date);
+                const today = new Date('2024-07-01'); // Using fixed date for consistent CAGR
+                let years = (today - txnDate) / (1000 * 60 * 60 * 24 * 365);
+                if (years < 0) years = 0;
+                
+                const marketValue = model.model(txn.amount, years);
+                let cagr = 0;
+                if (years > 0) {
+                  cagr = ((marketValue / txn.amount) ** (1 / years)) - 1;
+                }
+
+                // Check if user uploaded receipt
+                const isVerified = VERIFIED_RECEIPTS.some(r => 
+                   r.userId === user.id && 
+                   Math.abs(r.amount - txn.amount) <= (txn.amount * 0.05) &&
+                   Math.abs(new Date(r.date) - txnDate) <= 3 * 24 * 60 * 60 * 1000 &&
+                   narrationUpper.includes((r.merchant || '').toUpperCase())
+                );
+
+                assetsDetected.push({
+                  id: `ast-${txn.date}-${txn.amount}`,
+                  category: model.category,
+                  type: model.type,
+                  purchasePrice: txn.amount,
+                  purchaseDate: txn.date,
+                  marketValue: marketValue,
+                  cagr: cagr * 100,
+                  status: isVerified ? 'VERIFIED' : 'DETECTED',
+                  narration: txn.narration,
+                  tokenId: isVerified ? `VNK-${model.type}-${String(tokenSerial++).padStart(3, '0')}` : null
+                });
+                break;
+              }
+            }
           }
         }
       }
@@ -429,6 +490,7 @@ function buildDashboard(user) {
     accounts: accountSummaries, recentTransactions: allTransactions.slice(0, 25),
     yearlyFinancials, lifetimeIncome, lifetimeExpenses,
     lifetimeSavings: lifetimeIncome - lifetimeExpenses,
+    assets: assetsDetected,
   };
 }
 
@@ -530,6 +592,41 @@ app.get('/api/users/:id/aa-response', (req, res) => {
   }
 });
 
+/**
+ * POST /api/assets/:userId/upload-receipt
+ * Upload a receipt to verify an asset
+ */
+app.post('/api/assets/:userId/upload-receipt', (req, res) => {
+  const { userId } = req.params;
+  const { merchant, amount, date, phone } = req.body;
+  
+  if (!merchant || !amount || !date) {
+    return res.status(400).json({ error: 'Missing receipt details (merchant, amount, date)' });
+  }
+
+  // Save the receipt in memory
+  VERIFIED_RECEIPTS.push({
+    userId,
+    merchant,
+    amount: parseFloat(amount),
+    date,
+    phone
+  });
+
+  res.json({ success: true, message: 'Receipt uploaded and reconciliation pending.' });
+});
+
+/**
+ * GET /api/assets/:userId
+ * Get all assets for a user
+ */
+app.get('/api/assets/:userId', (req, res) => {
+  const user = TEST_USERS.find((u) => u.id === req.params.userId);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  const dashboard = buildDashboard(user);
+  res.json(dashboard.assets || []);
+});
+
 app.get('/api/schema-info', (req, res) => {
   res.json({
     supportedFITypes: [
@@ -545,10 +642,14 @@ app.get('/api/schema-info', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`\n╔══════════════════════════════════════════════════════════════╗`);
-  console.log(`║     V Y N K  —  Financial Intelligence Dashboard            ║`);
-  console.log(`║     Server running at http://localhost:${PORT}                   ║`);
-  console.log(`║     Pipeline: XML → ECDH Encrypt → Decrypt → Parse → Render║`);
-  console.log(`╚══════════════════════════════════════════════════════════════╝\n`);
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`\n╔══════════════════════════════════════════════════════════════╗`);
+    console.log(`║     V Y N K  —  Financial Intelligence Dashboard            ║`);
+    console.log(`║     Server running at http://localhost:${PORT}                   ║`);
+    console.log(`║     Pipeline: XML → ECDH Encrypt → Decrypt → Parse → Render║`);
+    console.log(`╚══════════════════════════════════════════════════════════════╝\n`);
+  });
+}
+
+module.exports = app;

@@ -108,6 +108,28 @@
       <div class="card-body" id="liabilitiesSection"></div>
     </div>
 
+    <!-- Asset Intelligence & Tokenization -->
+    <div class="card mt-6 asset-intel-card">
+      <div class="card-header">
+        <h3><span class="icon icon--asset">🏷️</span> Asset Intelligence &amp; Tokenization</h3>
+      </div>
+      <div class="card-body">
+        <div class="upload-section">
+          <form id="receiptForm" class="upload-form">
+            <input type="file" id="receiptFile" class="file-input" required />
+            <button type="submit" class="btn btn--primary btn--sm" id="btnUploadReceipt">Upload Receipt</button>
+          </form>
+          <div id="uploadStatus" class="upload-status"></div>
+        </div>
+        <div class="assets-grid mt-4" id="assetIntelGrid">
+          <!-- Rendered via JS -->
+        </div>
+        <div class="asset-intel-summary mt-4" id="assetIntelSummary">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+    </div>
+
     <!-- Year-wise Earnings & Expenses -->
     <div class="card mt-6">
       <div class="card-header">
