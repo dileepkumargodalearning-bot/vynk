@@ -6,84 +6,116 @@
   <title>Vynk — Financial Intelligence</title>
   <meta name="description" content="Vynk v2 — Modern AI-powered financial intelligence dashboard via Account Aggregator."/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 
-  <!-- Login Screen -->
+  <!-- Ambient background effects -->
+  <div class="ambient-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <!-- LOGIN SCREEN -->
   <div id="loginScreen" class="screen active">
-    <div class="login-container">
-      <div class="login-logo">
-        <div class="logo-mark">V</div>
-        <h1>Vynk</h1>
-        <p class="login-subtitle">Financial Intelligence Platform</p>
+    <div class="login-wrapper">
+      <div class="login-brand">
+        <div class="brand-mark"><span>V</span></div>
+        <h1 class="brand-name">Vynk</h1>
+        <p class="brand-tag">Financial Intelligence Platform</p>
+        <div class="brand-chips">
+          <span class="chip">Account Aggregator</span>
+          <span class="chip">ReBIT Compliant</span>
+          <span class="chip">ECDH Encrypted</span>
+        </div>
       </div>
       <div class="login-card">
-        <div id="stepMobile" class="login-step active">
-          <h2>Welcome back</h2>
-          <p>Enter your registered mobile number</p>
-          <div class="input-group">
-            <span class="input-prefix">+91</span>
-            <input type="tel" id="mobileInput" maxlength="10" placeholder="9876543210" autocomplete="off"/>
+        <!-- Step 1: Mobile -->
+        <div id="stepMobile" class="step active">
+          <div class="step-header">
+            <h2>Sign in</h2>
+            <p>Enter your registered mobile number</p>
           </div>
-          <button class="btn-primary" id="btnSendOtp">Send OTP</button>
-          <div id="mobileError" class="error-msg"></div>
-        </div>
-        <div id="stepOtp" class="login-step">
-          <h2>Verify OTP</h2>
-          <p>Enter the 6-digit code sent to <span id="otpMobileDisplay"></span></p>
-          <div class="otp-inputs" id="otpInputs">
-            <input type="text" maxlength="1" class="otp-digit" data-idx="0" inputmode="numeric"/>
-            <input type="text" maxlength="1" class="otp-digit" data-idx="1" inputmode="numeric"/>
-            <input type="text" maxlength="1" class="otp-digit" data-idx="2" inputmode="numeric"/>
-            <input type="text" maxlength="1" class="otp-digit" data-idx="3" inputmode="numeric"/>
-            <input type="text" maxlength="1" class="otp-digit" data-idx="4" inputmode="numeric"/>
-            <input type="text" maxlength="1" class="otp-digit" data-idx="5" inputmode="numeric"/>
+          <div class="field">
+            <div class="field-inner">
+              <span class="field-prefix">+91</span>
+              <input type="tel" id="mobileInput" maxlength="10" placeholder="10-digit mobile" autocomplete="off"/>
+            </div>
           </div>
-          <button class="btn-primary" id="btnVerifyOtp">Verify & Login</button>
-          <button class="btn-text" id="btnBackMobile">← Change number</button>
-          <div id="otpError" class="error-msg"></div>
+          <button class="cta" id="btnSendOtp">
+            <span>Continue</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+          <div id="mobileError" class="field-error"></div>
         </div>
-        <div id="stepLoading" class="login-step">
-          <div class="login-spinner"></div>
-          <p>Fetching your financial data...</p>
+        <!-- Step 2: OTP -->
+        <div id="stepOtp" class="step">
+          <div class="step-header">
+            <h2>Verify OTP</h2>
+            <p>6-digit code sent to <strong id="otpMobileDisplay"></strong></p>
+          </div>
+          <div class="otp-row" id="otpInputs">
+            <input type="text" maxlength="1" class="otp-box" data-idx="0" inputmode="numeric"/>
+            <input type="text" maxlength="1" class="otp-box" data-idx="1" inputmode="numeric"/>
+            <input type="text" maxlength="1" class="otp-box" data-idx="2" inputmode="numeric"/>
+            <span class="otp-sep">–</span>
+            <input type="text" maxlength="1" class="otp-box" data-idx="3" inputmode="numeric"/>
+            <input type="text" maxlength="1" class="otp-box" data-idx="4" inputmode="numeric"/>
+            <input type="text" maxlength="1" class="otp-box" data-idx="5" inputmode="numeric"/>
+          </div>
+          <button class="cta" id="btnVerifyOtp">Verify &amp; Login</button>
+          <button class="cta-ghost" id="btnBackMobile">← Change number</button>
+          <div id="otpError" class="field-error"></div>
+        </div>
+        <!-- Step 3: Loading -->
+        <div id="stepLoading" class="step">
+          <div class="pulse-loader"><div></div><div></div><div></div></div>
+          <p class="loader-text">Decrypting financial data via AA pipeline…</p>
         </div>
       </div>
-      <p class="login-footer">Powered by Account Aggregator (ReBIT)</p>
     </div>
   </div>
 
-  <!-- Home Dashboard Screen -->
+  <!-- HOME SCREEN -->
   <div id="homeScreen" class="screen">
-    <header class="topbar">
-      <div class="topbar-left">
-        <div class="logo-sm">V</div>
-        <span class="topbar-title">Vynk</span>
+    <nav class="navbar">
+      <div class="nav-left">
+        <div class="nav-logo"><span>V</span></div>
+        <span class="nav-brand">Vynk</span>
       </div>
-      <div class="topbar-right">
-        <span id="userGreeting" class="user-greeting"></span>
-        <button class="btn-icon" id="btnLogout" title="Logout">⏻</button>
+      <div class="nav-right">
+        <div class="nav-user" id="navUser"></div>
+        <button class="nav-btn" id="btnLogout" title="Sign out">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        </button>
       </div>
-    </header>
-    <main class="home-main">
-      <div class="networth-hero" id="networthHero"></div>
-      <div class="tiles-grid" id="tilesGrid"></div>
+    </nav>
+    <main class="dashboard">
+      <!-- Net Worth Hero -->
+      <section class="nw-hero" id="nwHero"></section>
+      <!-- Quick Stats -->
+      <section class="quick-stats" id="quickStats"></section>
+      <!-- Tile Grid -->
+      <section class="tile-grid" id="tileGrid"></section>
     </main>
   </div>
 
-  <!-- Detail Screen -->
+  <!-- DETAIL SCREEN -->
   <div id="detailScreen" class="screen">
-    <header class="topbar">
-      <div class="topbar-left">
-        <button class="btn-icon" id="btnBack" title="Back">←</button>
-        <span class="topbar-title" id="detailTitle"></span>
+    <nav class="navbar">
+      <div class="nav-left">
+        <button class="nav-btn" id="btnBack" title="Back">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <span class="nav-brand" id="detailTitle"></span>
       </div>
-      <div class="topbar-right">
-        <span id="detailUserGreeting" class="user-greeting"></span>
+      <div class="nav-right">
+        <div class="nav-user" id="detailNavUser"></div>
       </div>
-    </header>
-    <main class="detail-main" id="detailContent"></main>
+    </nav>
+    <main class="detail-body" id="detailContent"></main>
   </div>
 
 <script src="app.js"></script>
