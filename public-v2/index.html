@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vynk — Financial Intelligence</title>
+  <meta name="description" content="Vynk v2 — Modern AI-powered financial intelligence dashboard via Account Aggregator."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <!-- Login Screen -->
+  <div id="loginScreen" class="screen active">
+    <div class="login-container">
+      <div class="login-logo">
+        <div class="logo-mark">V</div>
+        <h1>Vynk</h1>
+        <p class="login-subtitle">Financial Intelligence Platform</p>
+      </div>
+      <div class="login-card">
+        <div id="stepMobile" class="login-step active">
+          <h2>Welcome back</h2>
+          <p>Enter your registered mobile number</p>
+          <div class="input-group">
+            <span class="input-prefix">+91</span>
+            <input type="tel" id="mobileInput" maxlength="10" placeholder="9876543210" autocomplete="off"/>
+          </div>
+          <button class="btn-primary" id="btnSendOtp">Send OTP</button>
+          <div id="mobileError" class="error-msg"></div>
+        </div>
+        <div id="stepOtp" class="login-step">
+          <h2>Verify OTP</h2>
+          <p>Enter the 6-digit code sent to <span id="otpMobileDisplay"></span></p>
+          <div class="otp-inputs" id="otpInputs">
+            <input type="text" maxlength="1" class="otp-digit" data-idx="0" inputmode="numeric"/>
+            <input type="text" maxlength="1" class="otp-digit" data-idx="1" inputmode="numeric"/>
+            <input type="text" maxlength="1" class="otp-digit" data-idx="2" inputmode="numeric"/>
+            <input type="text" maxlength="1" class="otp-digit" data-idx="3" inputmode="numeric"/>
+            <input type="text" maxlength="1" class="otp-digit" data-idx="4" inputmode="numeric"/>
+            <input type="text" maxlength="1" class="otp-digit" data-idx="5" inputmode="numeric"/>
+          </div>
+          <button class="btn-primary" id="btnVerifyOtp">Verify & Login</button>
+          <button class="btn-text" id="btnBackMobile">← Change number</button>
+          <div id="otpError" class="error-msg"></div>
+        </div>
+        <div id="stepLoading" class="login-step">
+          <div class="login-spinner"></div>
+          <p>Fetching your financial data...</p>
+        </div>
+      </div>
+      <p class="login-footer">Powered by Account Aggregator (ReBIT)</p>
+    </div>
+  </div>
+
+  <!-- Home Dashboard Screen -->
+  <div id="homeScreen" class="screen">
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="logo-sm">V</div>
+        <span class="topbar-title">Vynk</span>
+      </div>
+      <div class="topbar-right">
+        <span id="userGreeting" class="user-greeting"></span>
+        <button class="btn-icon" id="btnLogout" title="Logout">⏻</button>
+      </div>
+    </header>
+    <main class="home-main">
+      <div class="networth-hero" id="networthHero"></div>
+      <div class="tiles-grid" id="tilesGrid"></div>
+    </main>
+  </div>
+
+  <!-- Detail Screen -->
+  <div id="detailScreen" class="screen">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="btn-icon" id="btnBack" title="Back">←</button>
+        <span class="topbar-title" id="detailTitle"></span>
+      </div>
+      <div class="topbar-right">
+        <span id="detailUserGreeting" class="user-greeting"></span>
+      </div>
+    </header>
+    <main class="detail-main" id="detailContent"></main>
+  </div>
+
+<script src="app.js"></script>
+</body>
+</html>

@@ -5,7 +5,10 @@ const aaBridge = require('./aa-bridge');
 
 const app = express();
 app.use(express.json({ limit: '10mb' }));
-app.use(express.static(path.join(__dirname, 'public')));
+
+// Versioned static file serving: v2 (new) at root, v1 (old) at /v1
+app.use('/v1', express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public-v2')));
 
 // ============================================================================
 // TEST USERS — Realistic multi-asset financial profiles
@@ -1228,13 +1231,41 @@ app.get('/api/schema-info', (req, res) => {
   });
 });
 
+// ============================================================================
+// Auth Endpoints (Static OTP for demo)
+// ============================================================================
+
+const OTP_MAP = {
+  '9876543210': '123456',  // Rajesh Kumar
+  '8765432109': '234567',  // Priya Sharma
+  '7654321098': '345678',  // Amit Patel
+};
+
+app.post('/api/auth/send-otp', (req, res) => {
+  const { mobile } = req.body;
+  if (!mobile || mobile.length !== 10) return res.status(400).json({ error: 'Invalid mobile number' });
+  const user = TEST_USERS.find(u => u.phone === mobile);
+  if (!user) return res.status(404).json({ error: 'Mobile number not registered' });
+  res.json({ success: true, message: 'OTP sent successfully' });
+});
+
+app.post('/api/auth/verify-otp', (req, res) => {
+  const { mobile, otp } = req.body;
+  if (!mobile || !otp) return res.status(400).json({ error: 'Mobile and OTP required' });
+  const expectedOtp = OTP_MAP[mobile];
+  if (!expectedOtp || otp !== expectedOtp) return res.status(401).json({ error: 'Invalid OTP' });
+  const user = TEST_USERS.find(u => u.phone === mobile);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  res.json({ success: true, userId: user.id, name: user.name, phone: user.phone, email: user.email });
+});
+
 const PORT = process.env.PORT || 3000;
 if (!process.env.VERCEL) {
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`\n╔══════════════════════════════════════════════════════════════╗`);
-    console.log(`║     V Y N K  —  Financial Intelligence Dashboard            ║`);
-    console.log(`║     Server running at http://localhost:${PORT}                   ║`);
-    console.log(`║     Pipeline: XML → ECDH Encrypt → Decrypt → Parse → Render║`);
+    console.log(`║     V Y N K  v2  —  Financial Intelligence Dashboard        ║`);
+    console.log(`║     v2 (new):  http://localhost:${PORT}/                         ║`);
+    console.log(`║     v1 (old):  http://localhost:${PORT}/v1                       ║`);
     console.log(`╚══════════════════════════════════════════════════════════════╝\n`);
   });
 }
