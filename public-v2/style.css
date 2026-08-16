@@ -657,6 +657,10 @@ body {
 .t-yearly .tile-ico { background: rgba(16,185,129,0.12); }
 .t-yearly .tile-number { color: var(--emerald); }
 
+.t-expense::before { background: var(--rose); }
+.t-expense .tile-ico { background: rgba(244,63,94,0.12); }
+.t-expense .tile-number { color: var(--rose); }
+
 .t-pipe::before { background: var(--blue); }
 .t-pipe .tile-ico { background: rgba(59,130,246,0.12); }
 .t-pipe .tile-number { color: var(--blue); font-size: 1rem; }

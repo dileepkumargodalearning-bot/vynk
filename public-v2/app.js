@@ -210,8 +210,10 @@
         val:'−' + fmt(lia), foot: dash.liabilities.length + ' active loans outstanding' },
       { id:'spending', cls:'t-spend', icon:'💸', name:'Spending Analysis',
         val:fmt(dash.totalExpenses), foot:'Top: ' + (dash.spending[0]?.label||'None') + ' (' + (dash.spending[0]?.percent||0).toFixed(0) + '%)' },
-      { id:'yearly', cls:'t-yearly', icon:'📅', name:'Yearly Performance',
-        val: dash.yearlyFinancials.length + ' Years', foot:'Lifetime savings: ' + fmt(dash.lifetimeSavings) + ' at ' + savingsRate + '% rate' },
+      { id:'yearly', cls:'t-yearly', icon:'📅', name:'Savings Rate',
+        val: savingsRate + '%', foot:'Lifetime savings: ' + fmt(dash.lifetimeSavings) + ' over ' + dash.yearlyFinancials.length + ' years' },
+      { id:'expenses', cls:'t-expense', icon:'📉', name:'Expense Ratio',
+        val: expenseRate + '%', foot:'Lifetime expenses: ' + fmt(dash.lifetimeExpenses) + ' of ' + fmt(dash.lifetimeIncome) + ' income' },
       { id:'pipeline', cls:'t-pipe tile-full', icon:'🔐', name:'AA Pipeline Inspector',
         val:'X25519 → AES-256-GCM → ReBIT XML', foot:'View full encryption pipeline and decrypted FI data' },
     ];
