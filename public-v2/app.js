@@ -130,33 +130,72 @@
     const lia = dash.totalLiabilities;
     const assets = dash.assets || [];
     const verified = assets.filter(a => a.tokenId).length;
-
     const pending = assets.filter(a => !a.tokenId).length;
-
-    // Hero — clickable breakdown stats
-    $('#nwHero').innerHTML = `
-      <div class="nw-label">Total Net Worth</div>
-      <div class="nw-amount">${fmt(net)}</div>
-      <div class="nw-sub">${dash.accountCount} financial accounts · ${assets.length} physical assets · ${verified} tokenized</div>
-      <div class="nw-breakdown">
-        <div class="nw-stat clickable" data-nav="allocation"><span class="nw-stat-label">Financial Assets ›</span><span class="nw-stat-val green">${fmt(fin)}</span></div>
-        <div class="nw-stat clickable" data-nav="assets"><span class="nw-stat-label">Physical Assets ›</span><span class="nw-stat-val cyan">${fmt(phy)}</span></div>
-        <div class="nw-stat clickable" data-nav="liabilities"><span class="nw-stat-label">Liabilities ›</span><span class="nw-stat-val red">−${fmt(lia)}</span></div>
-      </div>
-    `;
-
-    // Attach click events to hero stats
-    $$('.nw-stat.clickable').forEach(el => el.addEventListener('click', () => openDetail(el.dataset.nav)));
-
-    // Quick Stats — all clickable
-    const topAlloc = dash.assetAllocation[0];
     const savingsRate = dash.lifetimeIncome > 0 ? ((dash.lifetimeSavings / dash.lifetimeIncome) * 100).toFixed(0) : '0';
-    $('#quickStats').innerHTML = `
-      <div class="qs-card clickable" data-nav="accounts"><div class="qs-icon">🏦</div><div class="qs-val">${dash.accountCount}</div><div class="qs-label">Accounts ›</div></div>
-      <div class="qs-card clickable" data-nav="allocation"><div class="qs-icon">📊</div><div class="qs-val">${dash.assetAllocation.length}</div><div class="qs-label">Asset Classes ›</div></div>
-      <div class="qs-card clickable" data-nav="assets"><div class="qs-icon">🏷️</div><div class="qs-val">${verified}/${assets.length}</div><div class="qs-label">Tokenized ›</div></div>
-      <div class="qs-card clickable" data-nav="yearly"><div class="qs-icon">💹</div><div class="qs-val">${savingsRate}%</div><div class="qs-label">Savings Rate ›</div></div>
-    `;
+    const expenseRate = dash.lifetimeIncome > 0 ? ((dash.lifetimeExpenses / dash.lifetimeIncome) * 100).toFixed(0) : '0';
+
+    // Build SVG net worth trend chart from yearly financials
+    const yf = dash.yearlyFinancials || [];
+    let chartSvg = '';
+    if (yf.length >= 2) {
+      let cumulative = 0;
+      const points = yf.map(y => { cumulative += y.savings; return { year: y.year, val: cumulative }; });
+      const minVal = Math.min(...points.map(p => p.val));
+      const maxVal = Math.max(...points.map(p => p.val));
+      const range = maxVal - minVal || 1;
+      const W = 320, H = 140, padT = 10, padB = 25, padL = 5, padR = 5;
+      const chartW = W - padL - padR, chartH = H - padT - padB;
+
+      const pts = points.map((p, i) => {
+        const x = padL + (i / (points.length - 1)) * chartW;
+        const y = padT + chartH - ((p.val - minVal) / range) * chartH;
+        return { x, y, year: p.year, val: p.val };
+      });
+
+      const linePath = pts.map((p, i) => (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ',' + p.y.toFixed(1)).join(' ');
+      const areaPath = linePath + ' L' + pts[pts.length-1].x.toFixed(1) + ',' + (padT + chartH) + ' L' + pts[0].x.toFixed(1) + ',' + (padT + chartH) + ' Z';
+
+      const labels = pts.map(p => '<text x="' + p.x.toFixed(1) + '" y="' + (H - 5) + '" text-anchor="middle" fill="#475569" font-size="9" font-family="Inter,sans-serif">' + p.year + '</text>').join('');
+      const dots = pts.map(p => '<circle cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="3" fill="#3b82f6" stroke="#050810" stroke-width="1.5"/>').join('');
+
+      chartSvg = '<svg viewBox="0 0 ' + W + ' ' + H + '" class="nw-chart">'
+        + '<defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3b82f6" stop-opacity="0.25"/><stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/></linearGradient></defs>'
+        + '<path d="' + areaPath + '" fill="url(#cg)"/>'
+        + '<path d="' + linePath + '" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
+        + dots + labels
+        + '</svg>';
+    }
+
+    // Hero — split layout with chart
+    $('#nwHero').innerHTML = ''
+      + '<div class="nw-row">'
+      +   '<div class="nw-left">'
+      +     '<div class="nw-label">Total Net Worth</div>'
+      +     '<div class="nw-amount">' + fmt(net) + '</div>'
+      +     '<div class="nw-sub">' + dash.accountCount + ' accounts · ' + assets.length + ' physical assets · ' + verified + ' tokenized</div>'
+      +     '<div class="nw-tiles">'
+      +       '<div class="nw-tile clickable" data-nav="financial"><div class="nw-tile-label">Financial Assets ›</div><div class="nw-tile-val green">' + fmt(fin) + '</div></div>'
+      +       '<div class="nw-tile clickable" data-nav="assets"><div class="nw-tile-label">Physical Assets ›</div><div class="nw-tile-val cyan">' + fmt(phy) + '</div></div>'
+      +       '<div class="nw-tile clickable" data-nav="liabilities"><div class="nw-tile-label">Liabilities ›</div><div class="nw-tile-val red">−' + fmt(lia) + '</div></div>'
+      +     '</div>'
+      +   '</div>'
+      +   '<div class="nw-right">'
+      +     '<div class="nw-chart-label">Cumulative Savings Trend</div>'
+      +     chartSvg
+      +   '</div>'
+      + '</div>';
+
+    // Attach click events to hero tiles
+    $$('.nw-tile.clickable').forEach(el => el.addEventListener('click', () => openDetail(el.dataset.nav)));
+
+    // Quick Stats — 5 clickable cards
+    const topAlloc = dash.assetAllocation[0];
+    $('#quickStats').innerHTML = ''
+      + '<div class="qs-card clickable" data-nav="accounts"><div class="qs-icon">🏦</div><div class="qs-val">' + dash.accountCount + '</div><div class="qs-label">Accounts ›</div></div>'
+      + '<div class="qs-card clickable" data-nav="allocation"><div class="qs-icon">📊</div><div class="qs-val">' + dash.assetAllocation.length + '</div><div class="qs-label">Asset Classes ›</div></div>'
+      + '<div class="qs-card clickable" data-nav="assets"><div class="qs-icon">🏷️</div><div class="qs-val">' + verified + '/' + assets.length + '</div><div class="qs-label">Tokenized ›</div></div>'
+      + '<div class="qs-card clickable" data-nav="yearly"><div class="qs-icon">💹</div><div class="qs-val">' + savingsRate + '%</div><div class="qs-label">Savings Rate ›</div></div>'
+      + '<div class="qs-card clickable" data-nav="expenses"><div class="qs-icon">📉</div><div class="qs-val">' + expenseRate + '%</div><div class="qs-label">Expense Ratio ›</div></div>';
 
     // Attach click events to quick stats
     $$('.qs-card.clickable').forEach(el => el.addEventListener('click', () => openDetail(el.dataset.nav)));
@@ -164,29 +203,29 @@
     // Tiles
     const tiles = [
       { id:'allocation', cls:'t-alloc', icon:'📊', name:'Asset Allocation',
-        val:`${dash.assetAllocation.length} Classes`, foot:`Top: ${topAlloc?.category} — ${fmt(topAlloc?.value||0)} (${(topAlloc?.percent||0).toFixed(1)}%)` },
+        val: dash.assetAllocation.length + ' Classes', foot:'Top: ' + (topAlloc?.category||'') + ' — ' + fmt(topAlloc?.value||0) + ' (' + (topAlloc?.percent||0).toFixed(1) + '%)' },
       { id:'assets', cls:'t-assets', icon:'🏠', name:'Physical Assets & Tokens',
-        val:`${assets.length} Detected`, foot:`${verified} tokenized · ${pending} pending verification` },
+        val: assets.length + ' Detected', foot: verified + ' tokenized · ' + pending + ' pending verification' },
       { id:'liabilities', cls:'t-liab', icon:'🏦', name:'Liabilities',
-        val:`−${fmt(lia)}`, foot:`${dash.liabilities.length} active loans outstanding` },
+        val:'−' + fmt(lia), foot: dash.liabilities.length + ' active loans outstanding' },
       { id:'spending', cls:'t-spend', icon:'💸', name:'Spending Analysis',
-        val:fmt(dash.totalExpenses), foot:`Top: ${dash.spending[0]?.label||'None'} (${(dash.spending[0]?.percent||0).toFixed(0)}%)` },
+        val:fmt(dash.totalExpenses), foot:'Top: ' + (dash.spending[0]?.label||'None') + ' (' + (dash.spending[0]?.percent||0).toFixed(0) + '%)' },
       { id:'yearly', cls:'t-yearly', icon:'📅', name:'Yearly Performance',
-        val:`${dash.yearlyFinancials.length} Years`, foot:`Lifetime savings: ${fmt(dash.lifetimeSavings)} at ${savingsRate}% rate` },
+        val: dash.yearlyFinancials.length + ' Years', foot:'Lifetime savings: ' + fmt(dash.lifetimeSavings) + ' at ' + savingsRate + '% rate' },
       { id:'pipeline', cls:'t-pipe tile-full', icon:'🔐', name:'AA Pipeline Inspector',
         val:'X25519 → AES-256-GCM → ReBIT XML', foot:'View full encryption pipeline and decrypted FI data' },
     ];
 
-    $('#tileGrid').innerHTML = tiles.map(t => `
-      <div class="tile ${t.cls}" data-tile="${t.id}">
-        <div class="tile-top">
-          <span class="tile-name">${t.name}</span>
-          <div class="tile-ico">${t.icon}</div>
-        </div>
-        <div class="tile-number">${t.val}</div>
-        <div class="tile-footer">${t.foot}</div>
-      </div>
-    `).join('');
+    $('#tileGrid').innerHTML = tiles.map(t => ''
+      + '<div class="tile ' + t.cls + '" data-tile="' + t.id + '">'
+      +   '<div class="tile-top">'
+      +     '<span class="tile-name">' + t.name + '</span>'
+      +     '<div class="tile-ico">' + t.icon + '</div>'
+      +   '</div>'
+      +   '<div class="tile-number">' + t.val + '</div>'
+      +   '<div class="tile-footer">' + t.foot + '</div>'
+      + '</div>'
+    ).join('');
 
     $$('.tile').forEach(t => t.addEventListener('click', () => openDetail(t.dataset.tile)));
   }
@@ -205,14 +244,107 @@
 
     switch(id) {
       case 'accounts': renderAccounts(title, body); break;
+      case 'financial': renderFinancial(title, body); break;
       case 'allocation': renderAllocation(title, body); break;
       case 'assets': renderAssets(title, body); break;
       case 'liabilities': renderLiabilities(title, body); break;
       case 'spending': renderSpending(title, body); break;
+      case 'expenses': renderExpenses(title, body); break;
       case 'yearly': renderYearly(title, body); break;
       case 'pipeline': renderPipeline(title, body); break;
     }
     show('#detailScreen');
+  }
+
+  // ── FINANCIAL ASSETS DETAIL ──
+  function renderFinancial(title, body) {
+    title.textContent = 'Financial Assets Breakdown';
+    const accs = dash.accounts || [];
+    const finAccs = accs.filter(a => !a.isLoan);
+    const finTotal = finAccs.reduce((s, a) => s + (a.displayValue || 0), 0);
+    const phyTotal = dash.physicalAssetTotal || 0;
+    const totalAssets = dash.totalAssets;
+
+    // Group by fiType
+    const byType = {};
+    finAccs.forEach(a => {
+      const t = a.fiType || 'Other';
+      if (!byType[t]) byType[t] = { items: [], total: 0 };
+      byType[t].items.push(a);
+      byType[t].total += (a.displayValue || 0);
+    });
+
+    let typeRows = '';
+    Object.entries(byType).sort((a, b) => b[1].total - a[1].total).forEach(([type, g]) => {
+      typeRows += '<tr style="background:var(--surface-2)">'
+        + '<td colspan="3" style="font-weight:700">' + type + ' (' + g.items.length + ')</td>'
+        + '<td class="val-up" style="font-weight:800">' + fmt(g.total) + '</td>'
+        + '<td>' + (totalAssets > 0 ? (g.total / totalAssets * 100).toFixed(1) : 0) + '%</td></tr>';
+      g.items.forEach(a => {
+        typeRows += '<tr><td style="padding-left:24px">' + a.label + '</td>'
+          + '<td>' + a.fipName + '</td>'
+          + '<td class="val-mono">' + a.maskedAccNumber + '</td>'
+          + '<td class="val-up">' + fmt(a.displayValue) + '</td>'
+          + '<td>' + (totalAssets > 0 ? (a.displayValue / totalAssets * 100).toFixed(1) : 0) + '%</td></tr>';
+      });
+    });
+
+    body.innerHTML = ''
+      + '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:center;margin-bottom:20px">'
+      + '<div class="d-card" style="margin:0"><div style="font-size:0.62rem;color:var(--text-3);text-transform:uppercase;font-weight:700">Financial Assets</div><div style="font-size:1.3rem;font-weight:900;color:var(--emerald)">' + fmt(finTotal) + '</div></div>'
+      + '<div class="d-card" style="margin:0"><div style="font-size:0.62rem;color:var(--text-3);text-transform:uppercase;font-weight:700">Physical Assets</div><div style="font-size:1.3rem;font-weight:900;color:var(--cyan)">' + fmt(phyTotal) + '</div></div>'
+      + '<div class="d-card" style="margin:0"><div style="font-size:0.62rem;color:var(--text-3);text-transform:uppercase;font-weight:700">Total Assets</div><div style="font-size:1.3rem;font-weight:900">' + fmt(totalAssets) + '</div></div>'
+      + '</div>'
+      + '<div class="d-card" style="margin-bottom:16px"><div class="d-title">✅ Net Worth Calculation Proof</div>'
+      + '<div class="d-table-wrap"><table class="d-table"><tbody>'
+      + '<tr><td style="font-weight:700">Financial Assets Total</td><td class="val-up" style="font-weight:800">' + fmt(finTotal) + '</td></tr>'
+      + '<tr><td style="font-weight:700">+ Physical Assets Total</td><td class="val-cyan" style="font-weight:800">' + fmt(phyTotal) + '</td></tr>'
+      + '<tr style="border-top:2px solid var(--border)"><td style="font-weight:800">= Total Assets</td><td style="font-weight:900;font-size:1.1rem">' + fmt(totalAssets) + '</td></tr>'
+      + '<tr><td style="font-weight:700">− Total Liabilities</td><td class="val-down" style="font-weight:800">−' + fmt(dash.totalLiabilities) + '</td></tr>'
+      + '<tr style="border-top:2px solid var(--blue);background:rgba(59,130,246,0.04)"><td style="font-weight:900;font-size:1rem">= Net Worth</td><td style="font-weight:900;font-size:1.2rem;color:var(--blue)">' + fmt(dash.netWorth) + '</td></tr>'
+      + '</tbody></table></div></div>'
+      + '<div class="d-card"><div class="d-title">🏦 Financial Assets by Type</div>'
+      + '<div class="d-table-wrap"><table class="d-table"><thead><tr><th>Account</th><th>Institution</th><th>A/C Number</th><th>Balance</th><th>% of Total</th></tr></thead>'
+      + '<tbody>' + typeRows + '</tbody></table></div></div>';
+  }
+
+  // ── EXPENSE RATIO DETAIL ──
+  function renderExpenses(title, body) {
+    title.textContent = 'Expense Ratio Analysis';
+    const yf = dash.yearlyFinancials || [];
+    const totalIncome = dash.lifetimeIncome;
+    const totalExpenses = dash.lifetimeExpenses;
+    const expenseRatio = totalIncome > 0 ? ((totalExpenses / totalIncome) * 100) : 0;
+    const savingsRatio = totalIncome > 0 ? ((dash.lifetimeSavings / totalIncome) * 100) : 0;
+
+    let yearRows = '';
+    yf.forEach(y => {
+      const er = y.income > 0 ? ((y.expenses / y.income) * 100).toFixed(1) : '0.0';
+      const sr = y.income > 0 ? ((y.savings / y.income) * 100).toFixed(1) : '0.0';
+      yearRows += '<tr><td style="font-weight:700">' + y.year + '</td>'
+        + '<td class="val-up">' + fmt(y.income) + '</td>'
+        + '<td class="val-down">' + fmt(y.expenses) + '</td>'
+        + '<td style="color:var(--amber);font-weight:700">' + er + '%</td>'
+        + '<td style="color:var(--emerald);font-weight:700">' + sr + '%</td></tr>';
+    });
+
+    body.innerHTML = ''
+      + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;text-align:center;margin-bottom:20px">'
+      + '<div class="d-card" style="margin:0"><div style="font-size:0.62rem;color:var(--text-3);text-transform:uppercase;font-weight:700">Lifetime Income</div><div style="font-size:1.1rem;font-weight:900;color:var(--emerald)">' + fmt(totalIncome) + '</div></div>'
+      + '<div class="d-card" style="margin:0"><div style="font-size:0.62rem;color:var(--text-3);text-transform:uppercase;font-weight:700">Lifetime Expenses</div><div style="font-size:1.1rem;font-weight:900;color:var(--rose)">' + fmt(totalExpenses) + '</div></div>'
+      + '<div class="d-card" style="margin:0"><div style="font-size:0.62rem;color:var(--text-3);text-transform:uppercase;font-weight:700">Expense Ratio</div><div style="font-size:1.1rem;font-weight:900;color:var(--amber)">' + expenseRatio.toFixed(1) + '%</div></div>'
+      + '<div class="d-card" style="margin:0"><div style="font-size:0.62rem;color:var(--text-3);text-transform:uppercase;font-weight:700">Savings Ratio</div><div style="font-size:1.1rem;font-weight:900;color:var(--emerald)">' + savingsRatio.toFixed(1) + '%</div></div>'
+      + '</div>'
+      + '<div class="d-card" style="margin-bottom:16px"><div class="d-title">📉 How Expense Ratio is Calculated</div>'
+      + '<div class="d-table-wrap"><table class="d-table"><tbody>'
+      + '<tr><td style="font-weight:700">Lifetime Expenses</td><td class="val-down">' + fmt(totalExpenses) + '</td></tr>'
+      + '<tr><td style="font-weight:700">÷ Lifetime Income</td><td class="val-up">' + fmt(totalIncome) + '</td></tr>'
+      + '<tr style="border-top:2px solid var(--amber);background:rgba(245,158,11,0.04)"><td style="font-weight:900">= Expense Ratio</td><td style="font-weight:900;font-size:1.2rem;color:var(--amber)">' + expenseRatio.toFixed(1) + '%</td></tr>'
+      + '<tr style="background:rgba(16,185,129,0.04)"><td style="font-weight:900">= Savings Ratio (1 − ER)</td><td style="font-weight:900;font-size:1.2rem;color:var(--emerald)">' + savingsRatio.toFixed(1) + '%</td></tr>'
+      + '</tbody></table></div></div>'
+      + '<div class="d-card"><div class="d-title">📅 Year-wise Expense vs Savings Ratio</div>'
+      + '<div class="d-table-wrap"><table class="d-table"><thead><tr><th>Year</th><th>Income</th><th>Expenses</th><th>Expense Ratio</th><th>Savings Ratio</th></tr></thead>'
+      + '<tbody>' + yearRows + '</tbody></table></div></div>';
   }
 
   // ── ACCOUNTS DETAIL ──

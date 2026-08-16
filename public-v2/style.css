@@ -424,8 +424,7 @@ body {
   background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(6,182,212,0.06));
   border: 1px solid rgba(59,130,246,0.12);
   border-radius: var(--r-xl);
-  padding: 36px 32px;
-  text-align: center;
+  padding: 32px;
   overflow: hidden;
 }
 
@@ -437,6 +436,25 @@ body {
   pointer-events: none;
 }
 
+.nw-row {
+  position: relative;
+  display: flex;
+  gap: 32px;
+  align-items: stretch;
+}
+
+.nw-left { flex: 1; min-width: 0; }
+
+.nw-right {
+  flex: 0 0 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-left: 1px solid var(--border);
+  padding-left: 28px;
+}
+
 .nw-label {
   font-size: 0.72rem;
   color: var(--text-3);
@@ -446,57 +464,84 @@ body {
 }
 
 .nw-amount {
-  font-size: 3rem;
+  font-size: 2.8rem;
   font-weight: 900;
   letter-spacing: -0.03em;
-  margin: 8px 0 4px;
+  margin: 6px 0 2px;
   background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .nw-sub {
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--text-3);
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
-.nw-breakdown {
-  display: flex;
-  justify-content: center;
-  gap: 32px;
-  flex-wrap: wrap;
+/* Breakdown Tiles inside hero */
+.nw-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
 }
 
-.nw-stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  min-width: 120px;
+.nw-tile {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.25s;
+  text-align: center;
 }
 
-.nw-stat-label {
-  font-size: 0.62rem;
+.nw-tile:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: var(--border-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+.nw-tile-label {
+  font-size: 0.58rem;
+  color: var(--text-3);
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+
+.nw-tile-val {
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.nw-tile-val.green { color: var(--emerald); }
+.nw-tile-val.cyan { color: var(--cyan); }
+.nw-tile-val.red { color: var(--rose); }
+
+/* Chart */
+.nw-chart-label {
+  font-size: 0.6rem;
   color: var(--text-3);
   text-transform: uppercase;
   font-weight: 700;
   letter-spacing: 0.06em;
+  margin-bottom: 10px;
+  text-align: center;
 }
 
-.nw-stat-val {
-  font-size: 1.1rem;
-  font-weight: 800;
+.nw-chart {
+  width: 100%;
+  max-width: 320px;
+  height: auto;
 }
 
-.nw-stat-val.green { color: var(--emerald); }
-.nw-stat-val.cyan { color: var(--cyan); }
-.nw-stat-val.red { color: var(--rose); }
-
-/* Quick Stats Row */
+/* Quick Stats Row — 5 cards */
 .quick-stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 12px;
 }
 
@@ -504,16 +549,16 @@ body {
   background: var(--surface-1);
   border: 1px solid var(--border);
   border-radius: var(--r-md);
-  padding: 16px;
+  padding: 14px 10px;
   text-align: center;
   transition: all 0.2s;
 }
 
 .qs-card:hover { background: var(--surface-2); border-color: var(--border-hover); }
 
-.qs-icon { font-size: 1.3rem; margin-bottom: 6px; }
-.qs-val { font-size: 1.15rem; font-weight: 800; }
-.qs-label { font-size: 0.62rem; color: var(--text-3); text-transform: uppercase; font-weight: 600; letter-spacing: 0.04em; margin-top: 2px; }
+.qs-icon { font-size: 1.2rem; margin-bottom: 4px; }
+.qs-val { font-size: 1.1rem; font-weight: 800; }
+.qs-label { font-size: 0.58rem; color: var(--text-3); text-transform: uppercase; font-weight: 600; letter-spacing: 0.04em; margin-top: 2px; }
 
 /* Tile Grid */
 .tile-grid {
@@ -1061,11 +1106,17 @@ body {
 }
 
 /* ── Responsive ── */
+@media (max-width: 900px) {
+  .nw-row { flex-direction: column; }
+  .nw-right { flex: none; border-left: none; border-top: 1px solid var(--border); padding-left: 0; padding-top: 20px; }
+  .quick-stats { grid-template-columns: repeat(3, 1fr); }
+}
+
 @media (max-width: 768px) {
   .quick-stats { grid-template-columns: repeat(2, 1fr); }
   .tile-grid { grid-template-columns: 1fr; }
-  .nw-amount { font-size: 2.2rem; }
-  .nw-breakdown { gap: 20px; }
+  .nw-amount { font-size: 2rem; }
+  .nw-tiles { grid-template-columns: 1fr; }
   .otp-row { gap: 6px; }
   .otp-box { width: 40px; height: 48px; font-size: 1.2rem; }
   .navbar { padding: 12px 16px; }
