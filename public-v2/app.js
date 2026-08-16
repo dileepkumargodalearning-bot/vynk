@@ -131,34 +131,42 @@
     const assets = dash.assets || [];
     const verified = assets.filter(a => a.tokenId).length;
 
-    // Hero
+    const pending = assets.filter(a => !a.tokenId).length;
+
+    // Hero — clickable breakdown stats
     $('#nwHero').innerHTML = `
       <div class="nw-label">Total Net Worth</div>
       <div class="nw-amount">${fmt(net)}</div>
-      <div class="nw-sub">${dash.accountCount} financial accounts · ${assets.length} physical assets detected</div>
+      <div class="nw-sub">${dash.accountCount} financial accounts · ${assets.length} physical assets · ${verified} tokenized</div>
       <div class="nw-breakdown">
-        <div class="nw-stat"><span class="nw-stat-label">Financial</span><span class="nw-stat-val green">${fmt(fin)}</span></div>
-        <div class="nw-stat"><span class="nw-stat-label">Physical</span><span class="nw-stat-val cyan">${fmt(phy)}</span></div>
-        <div class="nw-stat"><span class="nw-stat-label">Liabilities</span><span class="nw-stat-val red">−${fmt(lia)}</span></div>
+        <div class="nw-stat clickable" data-nav="allocation"><span class="nw-stat-label">Financial Assets ›</span><span class="nw-stat-val green">${fmt(fin)}</span></div>
+        <div class="nw-stat clickable" data-nav="assets"><span class="nw-stat-label">Physical Assets ›</span><span class="nw-stat-val cyan">${fmt(phy)}</span></div>
+        <div class="nw-stat clickable" data-nav="liabilities"><span class="nw-stat-label">Liabilities ›</span><span class="nw-stat-val red">−${fmt(lia)}</span></div>
       </div>
     `;
 
-    // Quick Stats
+    // Attach click events to hero stats
+    $$('.nw-stat.clickable').forEach(el => el.addEventListener('click', () => openDetail(el.dataset.nav)));
+
+    // Quick Stats — all clickable
     const topAlloc = dash.assetAllocation[0];
     const savingsRate = dash.lifetimeIncome > 0 ? ((dash.lifetimeSavings / dash.lifetimeIncome) * 100).toFixed(0) : '0';
     $('#quickStats').innerHTML = `
-      <div class="qs-card"><div class="qs-icon">🏦</div><div class="qs-val">${dash.accountCount}</div><div class="qs-label">Accounts</div></div>
-      <div class="qs-card"><div class="qs-icon">📊</div><div class="qs-val">${dash.assetAllocation.length}</div><div class="qs-label">Asset Classes</div></div>
-      <div class="qs-card"><div class="qs-icon">🏷️</div><div class="qs-val">${verified}/${assets.length}</div><div class="qs-label">Tokenized</div></div>
-      <div class="qs-card"><div class="qs-icon">💹</div><div class="qs-val">${savingsRate}%</div><div class="qs-label">Savings Rate</div></div>
+      <div class="qs-card clickable" data-nav="accounts"><div class="qs-icon">🏦</div><div class="qs-val">${dash.accountCount}</div><div class="qs-label">Accounts ›</div></div>
+      <div class="qs-card clickable" data-nav="allocation"><div class="qs-icon">📊</div><div class="qs-val">${dash.assetAllocation.length}</div><div class="qs-label">Asset Classes ›</div></div>
+      <div class="qs-card clickable" data-nav="assets"><div class="qs-icon">🏷️</div><div class="qs-val">${verified}/${assets.length}</div><div class="qs-label">Tokenized ›</div></div>
+      <div class="qs-card clickable" data-nav="yearly"><div class="qs-icon">💹</div><div class="qs-val">${savingsRate}%</div><div class="qs-label">Savings Rate ›</div></div>
     `;
+
+    // Attach click events to quick stats
+    $$('.qs-card.clickable').forEach(el => el.addEventListener('click', () => openDetail(el.dataset.nav)));
 
     // Tiles
     const tiles = [
       { id:'allocation', cls:'t-alloc', icon:'📊', name:'Asset Allocation',
         val:`${dash.assetAllocation.length} Classes`, foot:`Top: ${topAlloc?.category} — ${fmt(topAlloc?.value||0)} (${(topAlloc?.percent||0).toFixed(1)}%)` },
       { id:'assets', cls:'t-assets', icon:'🏠', name:'Physical Assets & Tokens',
-        val:`${assets.length} Detected`, foot:`${verified} verified & tokenized · ${fmt(phy)} total value` },
+        val:`${assets.length} Detected`, foot:`${verified} tokenized · ${pending} pending verification` },
       { id:'liabilities', cls:'t-liab', icon:'🏦', name:'Liabilities',
         val:`−${fmt(lia)}`, foot:`${dash.liabilities.length} active loans outstanding` },
       { id:'spending', cls:'t-spend', icon:'💸', name:'Spending Analysis',
@@ -196,6 +204,7 @@
     const phy = dash.physicalAssetTotal || 0;
 
     switch(id) {
+      case 'accounts': renderAccounts(title, body); break;
       case 'allocation': renderAllocation(title, body); break;
       case 'assets': renderAssets(title, body); break;
       case 'liabilities': renderLiabilities(title, body); break;
@@ -204,6 +213,43 @@
       case 'pipeline': renderPipeline(title, body); break;
     }
     show('#detailScreen');
+  }
+
+  // ── ACCOUNTS DETAIL ──
+  function renderAccounts(title, body) {
+    title.textContent = 'All Accounts';
+    const accs = dash.accounts || [];
+    const loans = dash.liabilities || [];
+    body.innerHTML = `
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:center;margin-bottom:20px">
+        <div class="d-card" style="margin:0"><div style="font-size:0.62rem;color:var(--text-3);text-transform:uppercase;font-weight:700">Financial Accounts</div><div style="font-size:1.3rem;font-weight:900;color:var(--emerald)">${accs.filter(a=>!a.isLoan).length}</div></div>
+        <div class="d-card" style="margin:0"><div style="font-size:0.62rem;color:var(--text-3);text-transform:uppercase;font-weight:700">Loan Accounts</div><div style="font-size:1.3rem;font-weight:900;color:var(--rose)">${loans.length}</div></div>
+        <div class="d-card" style="margin:0"><div style="font-size:0.62rem;color:var(--text-3);text-transform:uppercase;font-weight:700">Total Accounts</div><div style="font-size:1.3rem;font-weight:900">${dash.accountCount}</div></div>
+      </div>
+      <div class="d-card">
+        <div class="d-title">🏦 Financial Accounts</div>
+        <div class="d-table-wrap"><table class="d-table"><thead><tr><th>Account</th><th>Institution</th><th>Type</th><th>A/C Number</th><th>Balance</th></tr></thead><tbody>
+          ${accs.filter(a=>!a.isLoan).map(a => `<tr>
+            <td style="font-weight:600">${a.label}</td>
+            <td>${a.fipName}</td>
+            <td>${a.fiType}</td>
+            <td class="val-mono">${a.maskedAccNumber}</td>
+            <td class="val-up">${fmt(a.displayValue)}</td>
+          </tr>`).join('')}
+        </tbody></table></div>
+      </div>
+      ${loans.length ? `<div class="d-card">
+        <div class="d-title">🏦 Loan Accounts</div>
+        <div class="d-table-wrap"><table class="d-table"><thead><tr><th>Loan</th><th>Lender</th><th>A/C Number</th><th>Outstanding</th></tr></thead><tbody>
+          ${loans.map(l => `<tr>
+            <td style="font-weight:600">${l.label}</td>
+            <td>${l.summary.lender}</td>
+            <td class="val-mono">${l.maskedAccNumber}</td>
+            <td class="val-down">−${fmt(l.outstanding)}</td>
+          </tr>`).join('')}
+        </tbody></table></div>
+      </div>` : ''}
+    `;
   }
 
   function renderAllocation(title, body) {
@@ -234,6 +280,9 @@
     const assets = dash.assets || [];
     if (!assets.length) { body.innerHTML = '<div class="d-card"><p>No physical assets detected.</p></div>'; return; }
 
+    const verifiedAssets = assets.filter(a => a.tokenId);
+    const pendingAssets = assets.filter(a => !a.tokenId);
+
     const groups = {};
     let totalMV = 0, totalPP = 0;
     assets.forEach(a => {
@@ -249,7 +298,23 @@
     const order = ['Real Estate','Vehicles','Gold & Jewellery','Luxury Watches','Art & Collectibles','Electronics','Luxury Fashion','Other'];
     const sorted = order.filter(c => groups[c]);
 
-    let html = `
+    let html = '';
+
+    // Pending verification callout
+    if (pendingAssets.length > 0) {
+      html += `
+        <div class="pending-banner">
+          <div class="pb-icon">⚠️</div>
+          <div class="pb-content">
+            <strong>${pendingAssets.length} Asset${pendingAssets.length > 1 ? 's' : ''} Pending Verification</strong>
+            <span class="pb-sub">${pendingAssets.map(a => assetName(a.narration)).join(', ')} — upload receipt to verify & tokenize</span>
+          </div>
+          <span class="pb-val">${fmt(pendingAssets.reduce((s,a) => s + (a.marketValue||0), 0))}</span>
+        </div>
+      `;
+    }
+
+    html += `
       <div class="receipt-box">
         <h4>📁 Verify Asset</h4>
         <form id="rcptForm" style="display:flex;gap:10px;align-items:center;flex:1">
@@ -260,40 +325,58 @@
       </div>
     `;
 
+    function renderAssetCard(a) {
+      const mv = a.marketValue||0, pp = a.purchasePrice||0, gain = mv - pp;
+      const name = assetName(a.narration);
+      const isV = a.status === 'VERIFIED';
+      const t = a.tokenization;
+      const cardCls = isV ? 'ac-card' : 'ac-card pending';
+      const badgeCls = isV ? 'v' : 'd';
+      const badgeText = isV ? '✅ Verified' : '⏳ Needs Receipt';
+      const gainColor = gain >= 0 ? 'var(--emerald)' : 'var(--rose)';
+      const gainSign = gain >= 0 ? '+' : '';
+
+      let tokenHtml = '';
+      if (t) {
+        tokenHtml = '<div class="token-box">'
+          + '<div class="tb-row"><span class="tb-lbl">Standard</span><span class="tb-val">' + t.standard + '</span></div>'
+          + '<div class="tb-row"><span class="tb-lbl">Supply</span><span class="tb-val">' + t.totalSupply.toLocaleString() + '</span></div>'
+          + '<div class="tb-row"><span class="tb-lbl">Token ₹</span><span class="tb-val">' + fmt(t.tokenValue) + '</span></div>'
+          + '<div class="tb-row"><span class="tb-lbl">Type</span><span class="tb-val">' + t.fractionalLabel + '</span></div>'
+          + (t.lockInMonths > 0 ? '<div class="tb-row"><span class="tb-lbl">Lock-in</span><span class="tb-val">' + t.lockInMonths + 'mo</span></div>' : '')
+          + '<div class="tb-row"><span class="tb-lbl">Hash</span><span class="tb-val tb-hash">' + t.metadataHash + '</span></div>'
+          + '</div>';
+      }
+
+      let tokenIdHtml = '';
+      if (a.tokenId) {
+        tokenIdHtml = '<div style="margin-top:6px;font-size:0.62rem;font-family:var(--mono);color:var(--violet);font-weight:700">' + a.tokenId + '</div>';
+      }
+
+      return '<div class="' + cardCls + '">'
+        + '<div class="ac-card-top"><span class="ac-card-name">' + name + '</span><span class="ac-badge ' + badgeCls + '">' + badgeText + '</span></div>'
+        + '<div class="ac-card-val">' + fmt(mv) + '</div>'
+        + '<div class="ac-card-sub">Bought ' + fmt(pp) + ' · ' + (a.purchaseDate||'') + (a.yearsHeld ? ' · ' + a.yearsHeld + 'y' : '') + '</div>'
+        + '<div class="ac-card-gain" style="color:' + gainColor + '">' + gainSign + fmt(Math.abs(gain)) + ' (' + (a.cagr||0).toFixed(1) + '% CAGR)</div>'
+        + tokenHtml
+        + tokenIdHtml
+        + '</div>';
+    }
+
     sorted.forEach(cls => {
       const g = groups[cls];
       const info = ACLASS[cls] || { icon:'📦' };
       const cagr = g.pp > 0 ? (((g.mv / g.pp) - 1) * 100) : 0;
+      const cagrCls = cagr >= 0 ? 'up' : 'down';
+      const cagrSign = cagr >= 0 ? '+' : '';
 
-      html += `<div class="ac-group">
-        <div class="ac-head">
-          <div class="ac-head-left"><span>${info.icon}</span><span>${cls}</span><span class="ac-count">${g.items.length}</span></div>
-          <div class="ac-head-right"><span class="ac-total">${fmt(g.mv)}</span><span class="ac-cagr ${cagr>=0?'up':'down'}">${cagr>=0?'+':''}${cagr.toFixed(1)}%</span></div>
-        </div>
-        <div class="ac-grid">
-          ${g.items.map(a => {
-            const mv = a.marketValue||0, pp = a.purchasePrice||0, gain = mv - pp;
-            const name = assetName(a.narration);
-            const isV = a.status === 'VERIFIED';
-            const t = a.tokenization;
-            return `<div class="ac-card">
-              <div class="ac-card-top"><span class="ac-card-name">${name}</span><span class="ac-badge ${isV?'v':'d'}">${isV?'Verified':'Detected'}</span></div>
-              <div class="ac-card-val">${fmt(mv)}</div>
-              <div class="ac-card-sub">Bought ${fmt(pp)} · ${a.purchaseDate}${a.yearsHeld?' · '+a.yearsHeld+'y':''}</div>
-              <div class="ac-card-gain" style="color:${gain>=0?'var(--emerald)':'var(--rose)'}">${gain>=0?'+':''}${fmt(Math.abs(gain))} (${(a.cagr||0).toFixed(1)}% CAGR)</div>
-              ${t ? `<div class="token-box">
-                <div class="tb-row"><span class="tb-lbl">Standard</span><span class="tb-val">${t.standard}</span></div>
-                <div class="tb-row"><span class="tb-lbl">Supply</span><span class="tb-val">${t.totalSupply.toLocaleString()}</span></div>
-                <div class="tb-row"><span class="tb-lbl">Token ₹</span><span class="tb-val">${fmt(t.tokenValue)}</span></div>
-                <div class="tb-row"><span class="tb-lbl">Type</span><span class="tb-val">${t.fractionalLabel}</span></div>
-                ${t.lockInMonths>0?`<div class="tb-row"><span class="tb-lbl">Lock-in</span><span class="tb-val">${t.lockInMonths}mo</span></div>`:''}
-                <div class="tb-row"><span class="tb-lbl">Hash</span><span class="tb-val tb-hash">${t.metadataHash}</span></div>
-              </div>` : ''}
-              ${a.tokenId?`<div style="margin-top:6px;font-size:0.62rem;font-family:var(--mono);color:var(--violet);font-weight:700">${a.tokenId}</div>`:''}
-            </div>`;
-          }).join('')}
-        </div>
-      </div>`;
+      html += '<div class="ac-group">'
+        + '<div class="ac-head">'
+        + '<div class="ac-head-left"><span>' + info.icon + '</span><span>' + cls + '</span><span class="ac-count">' + g.items.length + '</span></div>'
+        + '<div class="ac-head-right"><span class="ac-total">' + fmt(g.mv) + '</span><span class="ac-cagr ' + cagrCls + '">' + cagrSign + cagr.toFixed(1) + '%</span></div>'
+        + '</div>'
+        + '<div class="ac-grid">' + g.items.map(renderAssetCard).join('') + '</div>'
+        + '</div>';
     });
 
     const totalGain = totalMV - totalPP;
@@ -302,8 +385,8 @@
       <div class="as-item"><div class="as-label">Portfolio Value</div><div class="as-val">${fmt(totalMV)}</div></div>
       <div class="as-item"><div class="as-label">Invested</div><div class="as-val">${fmt(totalPP)}</div></div>
       <div class="as-item"><div class="as-label">Gain / Loss</div><div class="as-val ${totalGain>=0?'green':'red'}">${totalGain>=0?'+':''}${fmt(Math.abs(totalGain))} (${gainPct}%)</div></div>
-      <div class="as-item"><div class="as-label">Assets</div><div class="as-val">${assets.length}</div></div>
-      <div class="as-item"><div class="as-label">Tokenized</div><div class="as-val">${assets.filter(a=>a.tokenId).length}</div></div>
+      <div class="as-item"><div class="as-label">Verified</div><div class="as-val green">${verifiedAssets.length}</div></div>
+      <div class="as-item"><div class="as-label">Pending</div><div class="as-val ${pendingAssets.length>0?'red':''}"> ${pendingAssets.length}</div></div>
     </div>`;
 
     body.innerHTML = html;
