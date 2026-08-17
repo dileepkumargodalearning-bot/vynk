@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Vynk — Financial Intelligence</title>
+  <meta name="description" content="Vynk v3 — Premium AI-powered wealth intelligence dashboard."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+  <div class="ambient"><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div></div>
+
+  <!-- LOGIN -->
+  <div id="loginScreen" class="screen active">
+    <div class="login-wrap">
+      <div class="login-brand">
+        <div class="logo"><span>V</span></div>
+        <h1>Vynk</h1>
+        <p class="tagline">Wealth Intelligence Platform</p>
+        <div class="chips"><span>Account Aggregator</span><span>ReBIT Compliant</span><span>ECDH Encrypted</span></div>
+      </div>
+      <div class="login-card">
+        <div id="stepMobile" class="step active">
+          <h2>Sign in</h2>
+          <p class="step-sub">Enter your registered mobile number</p>
+          <div class="field"><span class="prefix">+91</span><input type="tel" id="mobIn" maxlength="10" placeholder="10-digit mobile" autocomplete="off"/></div>
+          <button class="cta" id="btnSend"><span>Continue</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+          <div id="mobErr" class="err"></div>
+        </div>
+        <div id="stepOtp" class="step">
+          <h2>Verify OTP</h2>
+          <p class="step-sub">6-digit code sent to <strong id="otpDisplay"></strong></p>
+          <div class="otp-row" id="otpRow"></div>
+          <button class="cta" id="btnVerify">Verify & Login</button>
+          <button class="ghost" id="btnBack2">← Change number</button>
+          <div id="otpErr" class="err"></div>
+        </div>
+        <div id="stepLoad" class="step">
+          <div class="dots"><div></div><div></div><div></div></div>
+          <p class="load-text">Decrypting financial data…</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div id="homeScreen" class="screen">
+    <nav class="nav"><div class="nav-l"><div class="nav-logo"><span>V</span></div><span class="nav-name">Vynk</span></div><div class="nav-r"><span class="nav-user" id="navUser"></span><button class="nav-btn" id="btnLogout" title="Sign out"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg></button></div></nav>
+    <main class="home" id="homeContent"></main>
+  </div>
+
+  <!-- DETAIL -->
+  <div id="detailScreen" class="screen">
+    <nav class="nav"><div class="nav-l"><button class="nav-btn" id="btnBack"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button><span class="nav-name" id="detailTitle"></span></div><div class="nav-r"><span class="nav-user" id="detailUser"></span></div></nav>
+    <main class="detail" id="detailContent"></main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

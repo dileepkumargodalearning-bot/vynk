@@ -6,9 +6,10 @@ const aaBridge = require('./aa-bridge');
 const app = express();
 app.use(express.json({ limit: '10mb' }));
 
-// Versioned static file serving: v2 (new) at root, v1 (old) at /v1
+// Versioned static file serving: v3 (latest) at root, v2 at /v2, v1 at /v1
 app.use('/v1', express.static(path.join(__dirname, 'public')));
-app.use(express.static(path.join(__dirname, 'public-v2')));
+app.use('/v2', express.static(path.join(__dirname, 'public-v2')));
+app.use(express.static(path.join(__dirname, 'public-v3')));
 
 // ============================================================================
 // TEST USERS — Realistic multi-asset financial profiles
@@ -1069,6 +1070,67 @@ function buildDashboard(user) {
   const lifetimeIncome = yearlyFinancials.reduce((s, y) => s + y.income, 0);
   const lifetimeExpenses = yearlyFinancials.reduce((s, y) => s + y.expenses, 0);
 
+  // Historical Net Worth Trend (Year by Year Total Net Worth increase)
+  const yearsList = (user.yearlyFinancials || []).map(y => y.year).sort();
+  const netWorthHistory = [];
+  if (yearsList.length > 0) {
+    let cumulativeSavings = 0;
+    for (const yr of yearsList) {
+      const yData = yearlyFinancials.find(y => y.year === yr);
+      if (yData) cumulativeSavings += yData.savings;
+
+      // Calculate physical assets value in year `yr`
+      let yrPhysical = 0;
+      for (const a of assetsDetected) {
+        const pYear = parseInt((a.purchaseDate || '').split('-')[0], 10) || 2024;
+        if (pYear <= yr) {
+          const yearsDiff = yr - pYear;
+          const rate = (a.cagr || 0) / 100;
+          const valAtYr = Math.round(a.purchasePrice * Math.pow(1 + rate, Math.max(0, yearsDiff)));
+          yrPhysical += valAtYr;
+        }
+      }
+
+      // Calculate loan liability at year `yr`
+      let yrLiab = 0;
+      for (const l of liabilities) {
+        const disDate = l.summary?.disbursementDate || '2020-01-01';
+        const dYear = parseInt(disDate.split('-')[0], 10) || 2020;
+        if (dYear <= yr) {
+          const orig = l.summary?.originalLoanAmount || 0;
+          const out = l.summary?.outstandingBalance || 0;
+          const emi = (l.summary?.emiAmount || 0) * 12;
+          const yearsElapsed = yr - dYear;
+          const estBalance = Math.max(out, orig - (emi * yearsElapsed));
+          yrLiab += estBalance;
+        }
+      }
+
+      // If final year, calibrate exactly to current actual net worth
+      if (yr === yearsList[yearsList.length - 1]) {
+        netWorthHistory.push({
+          year: yr,
+          netWorth: netWorth,
+          financialAssets: totalAssets - physicalAssetTotal,
+          physicalAssets: physicalAssetTotal,
+          liabilities: totalLiabilities,
+          cumulativeSavings,
+        });
+      } else {
+        const estFin = Math.max(100000, cumulativeSavings);
+        const estNW = Math.max(0, estFin + yrPhysical - yrLiab);
+        netWorthHistory.push({
+          year: yr,
+          netWorth: estNW,
+          financialAssets: estFin,
+          physicalAssets: yrPhysical,
+          liabilities: yrLiab,
+          cumulativeSavings,
+        });
+      }
+    }
+  }
+
   return {
     user: { id: user.id, name: user.name, phone: user.phone, email: user.email, pan: user.pan },
     netWorth, totalAssets, totalLiabilities, physicalAssetTotal,
@@ -1081,6 +1143,7 @@ function buildDashboard(user) {
     yearlyFinancials, lifetimeIncome, lifetimeExpenses,
     lifetimeSavings: lifetimeIncome - lifetimeExpenses,
     assets: assetsDetected,
+    netWorthHistory,
   };
 }
 
@@ -1263,9 +1326,10 @@ const PORT = process.env.PORT || 3000;
 if (!process.env.VERCEL) {
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`\n╔══════════════════════════════════════════════════════════════╗`);
-    console.log(`║     V Y N K  v2  —  Financial Intelligence Dashboard        ║`);
-    console.log(`║     v2 (new):  http://localhost:${PORT}/                         ║`);
-    console.log(`║     v1 (old):  http://localhost:${PORT}/v1                       ║`);
+    console.log(`║     V Y N K  —  Financial Intelligence Dashboard            ║`);
+    console.log(`║     v3 (latest):  http://localhost:${PORT}/                      ║`);
+    console.log(`║     v2:           http://localhost:${PORT}/v2                     ║`);
+    console.log(`║     v1:           http://localhost:${PORT}/v1                     ║`);
     console.log(`╚══════════════════════════════════════════════════════════════╝\n`);
   });
 }
